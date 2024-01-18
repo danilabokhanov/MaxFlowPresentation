@@ -1,8 +1,9 @@
 #include "view.h"
+#include <iostream>
 
 namespace max_flow_app {
 View::View(): main_window_(),
-      graph_observer_([this](const MaxFlow::Data* data) {return UpdateGraphView(data);}),
+      graph_observer_([this](const MaxFlow::Data* data) {UpdateGraphView(data);}),
       view_observable_([this]() {return ProduceViewMessage();}),
       drawer_(main_window_.GetQwtFramePtr()) {
     connect(main_window_.GetVerticesButtonPtr(), SIGNAL (clicked()), this,
@@ -21,6 +22,7 @@ View::GraphObserver* View::GetSubscriberPtr() {
 }
 
 void View::ApplyButtonPressed() {
+    std::cout << "apply\n";
     auto* spin_box = main_window_.GetVerticesSpinBoxPtr();
     message_.signal_type = ViewSendingData::CHANGE_VERTICES_NUMBER;
     message_.args = static_cast<size_t>(spin_box -> value());
@@ -28,6 +30,7 @@ void View::ApplyButtonPressed() {
 }
 
 void View::AddButtonPressed() {
+    std::cout << "add\n";
     auto* spin_box_u = main_window_.GetUSpinBoxPtr();
     auto* spin_box_v = main_window_.GetVSpinBoxPtr();
     auto* spin_box_weight = main_window_.GetWeightSpinBoxPtr();
@@ -40,6 +43,7 @@ void View::AddButtonPressed() {
 }
 
 void View::DeleteButtonPressed() {
+    std::cout << "delete\n";
     auto* spin_box_u = main_window_.GetUSpinBoxPtr();
     auto* spin_box_v = main_window_.GetVSpinBoxPtr();
 
@@ -50,6 +54,7 @@ void View::DeleteButtonPressed() {
 }
 
 void View::GoNextButtonPressed() {
+    std::cout << "go next\n";
     message_.signal_type = ViewSendingData::GO_NEXT;
     message_.args = ViewSendingData::Empty{};
     view_observable_.Notify();

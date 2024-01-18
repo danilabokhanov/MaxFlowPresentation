@@ -23,11 +23,11 @@ bool MaxFlow::GoNext() {
         return true;
     }
     if (!FindNetwork()) {
-        current_flow_rate_ >>= 1;
-        if (current_flow_rate_ == 0) {
+        if (current_flow_rate_ == 1) {
             SetGraphToBasicStatus();
             return false;
         }
+        current_flow_rate_ >>= 1;
         SetGraphToBasicStatus();
     } else {
         is_path_processed_successfully_ = true;
@@ -48,8 +48,8 @@ void MaxFlow::AddEdge(const MaxFlow::BasicEdge &edge) {
 
     data_.edges_.push_back({.u = edge.u, .to = edge.to, .delta = edge.delta});
     data_.edges_.push_back({.u = edge.to, .to = edge.u, .delta = 0});
-    graph_[edge.u].push_back(m_ * 2 - 2);
-    graph_[edge.to].push_back(m_ * 2 - 1);
+    graph_[edge.u].push_back(m_ << 1);
+    graph_[edge.to].push_back((m_ << 1) + 1);
     m_++;
     graph_ovservable_.Notify();
 }
@@ -100,7 +100,7 @@ bool MaxFlow::FindNetwork() {
     std::vector<bool> used(n_, 0);
     used[0] = 1;
     dist[0] = 0;
-    SetVertexStatus(0, Status::OnTheNetwork, true);  // Notify
+    SetVertexStatus(0, Status::OnTheNetwork, true);
     while (!queue.empty()) {
         size_t i = queue.front();
         queue.pop_front();
@@ -133,9 +133,6 @@ bool MaxFlow::FindNetwork() {
             network_[u].push_back(i);
         }
     }
-    for (size_t i = 0; i < n_; i++) {
-        processed_neighbors_[i] = 0;
-    }
     return true;
 }
 
@@ -143,6 +140,9 @@ bool MaxFlow::FindPath(size_t vertex) {
     if (vertex == n_ - 1) {
         reversed_path_.clear();
         return true;
+    }
+    for (size_t i = 0; i < n_; i++) {
+        processed_neighbors_[i] = 0;
     }
     while (processed_neighbors_[vertex] < network_[vertex].size()) {
         size_t edge_id = network_[vertex][processed_neighbors_[vertex]++];

@@ -41,7 +41,7 @@ public:
     const Data* GetData() const;
 
 private:
-    inline static const size_t kMaxCost = 32, kDefaultN = 0, kDefaultM = 2;
+    inline static const size_t kMaxCost = 32, kDefaultN = 2, kDefaultM = 0;
     bool FindNetwork();
 
     bool FindPath(size_t vertex);

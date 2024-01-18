@@ -2,7 +2,8 @@
 
 namespace max_flow_app {
 Controller::Controller(MaxFlow* model_ptr): model_ptr_(model_ptr),
-      view_observer_([this] (const View::ViewSendingData* data) {
+      view_observer_([] (const View::ViewSendingData*){},
+                     [this] (const View::ViewSendingData* data) {
           if (data ->signal_type == View::ViewSendingData::CHANGE_VERTICES_NUMBER) {
               CallChangeVerticesNumber(std::get<size_t> (data->args));
               return;
@@ -16,7 +17,8 @@ Controller::Controller(MaxFlow* model_ptr): model_ptr_(model_ptr),
               return;
           }
           CallGoNext();
-      }) {
+      },
+                     [] (const View::ViewSendingData*){}) {
 }
 
 void Controller::CallChangeVerticesNumber(size_t new_number) {
