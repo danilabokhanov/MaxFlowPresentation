@@ -10,9 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 
-MainWindow::~MainWindow() {
-
-}
+MainWindow::~MainWindow() = default;
 
 QFrame* MainWindow::GetQwtFramePtr() const {
     return ui_ ->frame_qwt;

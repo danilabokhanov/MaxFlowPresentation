@@ -15,21 +15,22 @@ LIBS += $$CONAN_LIBDIRS_QWT $$CONAN_LIBS_QWT
 
 SOURCES += \
     application.cpp \
-    controller.cpp \
-    drawer.cpp \
+    Kernel/controller.cpp \
+    Interface/drawer.cpp \
     main.cpp \
-    mainwindow.cpp \
-    max_flow.cpp \
-    view.cpp
+    Interface/mainwindow.cpp \
+    Kernel/max_flow.cpp \
+    Kernel/view.cpp
 
 HEADERS += \
+    Kernel/mvc_messages.h \
     application.h \
-    controller.h \
-    drawer.h \
-    mainwindow.h \
-    max_flow.h \
-    observer_pattern.h \
-    view.h
+    Kernel/controller.h \
+    Interface/drawer.h \
+    Interface/mainwindow.h \
+    Kernel/max_flow.h \
+    Library/observer_pattern.h \
+    Kernel/view.h
 
 FORMS += \
     mainwindow.ui

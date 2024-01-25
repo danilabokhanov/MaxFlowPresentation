@@ -25,4 +25,5 @@ build_release
 *.pdf
 compile_commands.json
 .clangd
+*.pro.user
 

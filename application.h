@@ -1,7 +1,8 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "controller.h"
+#include "Kernel/view.h"
+#include "Kernel/controller.h"
 
 namespace max_flow_app {
 class Application {
