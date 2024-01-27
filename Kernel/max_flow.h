@@ -14,7 +14,7 @@ public:
     using Data = mvc_messages::MaxFlowData;
     using Status = mvc_messages::Status;
 
-    MaxFlow();
+    MaxFlow() = default;
 
     MaxFlow(size_t n, size_t m, const std::vector<BasicEdge>& edges);
 

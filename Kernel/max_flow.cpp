@@ -3,8 +3,6 @@
 #include <sys/types.h>
 
 namespace max_flow_app {
-MaxFlow::MaxFlow() = default;
-
 MaxFlow::MaxFlow(size_t n, size_t m, const std::vector<BasicEdge> &edges)
     : n_(n), m_(m), graph_(n), dist_(n_), processed_neighbors_(n),
       vertices_(n_, Status::Basic) {
