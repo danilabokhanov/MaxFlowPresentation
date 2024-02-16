@@ -15,23 +15,21 @@ bool MaxFlow::GoNext() {
         ProcessPath(path);
         return true;
     }
-    if (flow_rate_ == 1) {
-        SetGraphToBasicStatus();
-        return false;
+    if (!FindNetwork()) {
+        if (flow_rate_ == 1) {
+            ResetState();
+            return false;
+        }
+       flow_rate_ >>= 1;
     }
-    flow_rate_ >>= 1;
-    SetGraphToBasicStatus();
-    FindNetwork();
     return true;
 }
 
 void MaxFlow::AddEdge(const MaxFlow::BasicEdge &edge) {
-    ResetState();
-    SetGraphToBasicStatus();
-
     for (Edge &e : edges_) {
         if (e.u == edge.u && e.to == edge.to) {
             e.delta += edge.delta;
+            graph_ovservable_.Notify();
             return;
         }
     }
@@ -41,7 +39,8 @@ void MaxFlow::AddEdge(const MaxFlow::BasicEdge &edge) {
     graph_[edge.u].push_back(m_ << 1);
     graph_[edge.to].push_back((m_ << 1) + 1);
     m_++;
-    graph_ovservable_.Notify();
+
+    ResetState();
 }
 
 void MaxFlow::DeleteEdge(const MaxFlow::BasicEdge &edge) {
@@ -55,32 +54,29 @@ void MaxFlow::DeleteEdge(const MaxFlow::BasicEdge &edge) {
     if (index == edges_.size()) {
         return;
     }
+    index = std::min(index, index^1);
+    edges_.erase(edges_.begin() + index);
+    edges_.erase(edges_.begin() + index);
 
-    ResetState();
-    SetGraphToBasicStatus();
-
-    for (auto edges : graph_) {
+    for (auto& edges : graph_) {
         size_t deleted_index = edges.size();
         for (size_t i = 0; i < edges.size(); i++) {
-            if (edges[i] == index) {
+            if ((edges[i] ^ index) <= 1) {
                 deleted_index = i;
                 break;
             }
         }
         if (deleted_index != edges.size()) {
-            for (size_t i = 0; i < edges.size() - 1 - deleted_index; i++) {
-                std::swap(edges[i + deleted_index], edges[i + deleted_index + 1]);
-            }
-            edges.pop_back();
+            edges.erase(edges.begin() + deleted_index);
         }
-        for (auto &e : edges) {
-            if (e > index) {
-                e--;
+        for (auto &edge : edges) {
+            if (edge > index) {
+                edge -= 2;
             }
         }
     }
     m_--;
-    graph_ovservable_.Notify();
+    ResetState();
 }
 
 void MaxFlow::ExtendNetwork(size_t vertex, std::vector<bool>& used,
@@ -194,7 +190,17 @@ const MaxFlow::Edge &MaxFlow::GetReverseEdge(size_t index) const {
 }
 
 void MaxFlow::ResetState() {
-    flow_rate_ = kMaxCost;
+    for (auto &vertex_status : vertices_) {
+        vertex_status = Status::Basic;
+    }
+    flow_rate_ = 1;
+    for (auto &edge : edges_) {
+        edge.status = Status::Basic;
+        while ((flow_rate_ << 1) < edge.delta) {
+            flow_rate_++;
+        }
+    }
+    graph_ovservable_.Notify();
 }
 
 void MaxFlow::AddEdges(const std::vector<BasicEdge> &edges) {
@@ -205,16 +211,6 @@ void MaxFlow::AddEdges(const std::vector<BasicEdge> &edges) {
         graph_[u].push_back(edges_.size() - 2);
         graph_[to].push_back(edges_.size() - 1);
     }
-}
-
-void MaxFlow::SetGraphToBasicStatus() {
-    for (auto &vertex_status : vertices_) {
-        vertex_status = Status::Basic;
-    }
-    for (auto &edge : edges_) {
-        edge.status = Status::Basic;
-    }
-    graph_ovservable_.Notify();
 }
 
 size_t MaxFlow::GetCurrentFlow() const {
@@ -244,6 +240,5 @@ void MaxFlow::ChangeVerticesNumber(size_t new_number) {
     graph_ = std::move(new_graph);
     edges_ = std::move(new_edges);
     ResetState();
-    SetGraphToBasicStatus();
 }
 }

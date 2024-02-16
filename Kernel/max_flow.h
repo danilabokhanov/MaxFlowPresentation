@@ -15,7 +15,6 @@ public:
     using Status = mvc_messages::Status;
 
     MaxFlow() = default;
-
     MaxFlow(size_t n, size_t m, const std::vector<BasicEdge>& edges);
 
     void ChangeVerticesNumber(size_t new_number);
@@ -30,7 +29,7 @@ public:
     Data GetData() const;
 
 private:
-    inline static const size_t kMaxCost = 32, kDefaultN = 2, kDefaultM = 0;
+    inline static const size_t kDefaultN = 2, kDefaultM = 0;
     bool FindNetwork();
     void ExtendNetwork(size_t vertex, std::vector<bool>& used,
                        std::vector<ssize_t>& parent, std::deque<size_t>& queue);
@@ -48,7 +47,6 @@ private:
     void AddEdges(const std::vector<BasicEdge>& edges);
 
     void ResetState();
-    void SetGraphToBasicStatus();
 
     size_t n_ = kDefaultN, m_ = kDefaultM;
     std::vector<std::vector<size_t>> graph_ = std::vector<std::vector<size_t>>(kDefaultN);
@@ -57,7 +55,7 @@ private:
     std::vector<Edge> edges_;
     std::vector<Status> vertices_ = std::vector<Status>(n_, Status::Basic);
 
-    size_t flow_rate_ = kMaxCost, pushed_flow_ = 0;
+    size_t flow_rate_ = 1, pushed_flow_ = 0;
 
     observer_pattern::Observable<Data> graph_ovservable_ =
         observer_pattern::Observable<Data> ([this] () {return GetData();});

@@ -3,6 +3,7 @@
 
 #include "Interface/mainwindow.h"
 #include "Interface/drawer.h"
+#include "Library/observer_pattern.h"
 #include "mvc_messages.h"
 
 namespace max_flow_app {
@@ -11,17 +12,19 @@ class View : public QObject {
 public:
     View();
 
-    using GraphObserver = observer_pattern::Observer<mvc_messages::MaxFlowData>;
-    using Data = mvc_messages::CommandData;
+    using ReceivingData = mvc_messages::MaxFlowData;
+    using SendingData = mvc_messages::CommandData;
+    using GraphObserver = observer_pattern::Observer<ReceivingData>;
+    using CommandObservable = observer_pattern::Observable<SendingData>;
+    using CommandObserver = observer_pattern::Observer<SendingData>;
+    using BasicEdge = mvc_messages::BasicEdge;
 
     GraphObserver* GetSubscriberPtr();
 
-    Data message_;
+    SendingData message_;
 
-    using CommandObservable = observer_pattern::Observable<Data>;
-
-    Data ProduceViewMessage() const;
-    void RegisterController(observer_pattern::Observer<Data>* observer);
+    SendingData ProduceViewMessage() const;
+    void RegisterController(CommandObserver* observer);
 
 public slots:
     void ApplyButtonPressed();
@@ -31,12 +34,12 @@ public slots:
 
 private:
 
-    void UpdateGraphView(const MaxFlow::Data& data);
+    void UpdateGraphView(const ReceivingData& data);
 
     MainWindow main_window_;
+    Drawer drawer_;
     GraphObserver graph_observer_;
     CommandObservable command_observable_;
-    Drawer drawer_;
 };
 }
 #endif  // VIEW_H

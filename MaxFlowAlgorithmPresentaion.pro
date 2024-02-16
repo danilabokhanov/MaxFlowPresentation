@@ -1,5 +1,8 @@
 QT       += core gui
 
+QMAKE_CXXFLAGS += -fsanitize=address
+QMAKE_LFLAGS += -fsanitize=address
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17 warn_on

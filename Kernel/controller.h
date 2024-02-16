@@ -13,7 +13,6 @@ public:
     using ViewObserver = observer_pattern::Observer<CommandData>;
 
     Controller(MaxFlow* model_ptr);
-
     ViewObserver* GetSubscriberPtr();
 
 private:
