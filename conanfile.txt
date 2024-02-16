@@ -1,0 +1,6 @@
+[requires]
+qwt/6.2.0
+
+[generators]
+qmake
+
