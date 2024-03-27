@@ -2,6 +2,7 @@
 #define APPLICATION_H
 
 #include "Kernel/view.h"
+#include "Interface/geom_model.h"
 #include "Kernel/controller.h"
 
 namespace max_flow_app {
@@ -10,6 +11,7 @@ public:
     Application();
 private:
     MaxFlow model_;
+    GeomModel geom_model_;
     View view_;
     Controller controller_;
 };

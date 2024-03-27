@@ -17,6 +17,7 @@ INCLUDEPATH += $$CONAN_INCLUDEPATH_QWT
 LIBS += $$CONAN_LIBDIRS_QWT $$CONAN_LIBS_QWT
 
 SOURCES += \
+    Interface/geom_model.cpp \
     application.cpp \
     Kernel/controller.cpp \
     Interface/drawer.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
     Kernel/view.cpp
 
 HEADERS += \
+    Interface/geom_model.h \
     Kernel/mvc_messages.h \
     application.h \
     Kernel/controller.h \
@@ -33,7 +35,8 @@ HEADERS += \
     Interface/mainwindow.h \
     Kernel/max_flow.h \
     Library/observer_pattern.h \
-    Kernel/view.h
+    Kernel/view.h \
+    palette.h
 
 FORMS += \
     mainwindow.ui

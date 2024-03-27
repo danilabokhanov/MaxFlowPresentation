@@ -1,14 +1,15 @@
 #include "drawer.h"
 #include <math.h>
 #include <QwtWeedingCurveFitter>
+#include <QEventLoop>
 
 namespace max_flow_app {
 Drawer::Drawer(QFrame* frame): layout_(new QVBoxLayout(frame)), plot_(new QwtPlot(frame)) {
     plot_ -> setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     layout_ -> addWidget(plot_.get());
     frame -> setLayout(layout_.get());
-    plot_ -> setAxisScale(QwtPlot::xBottom, 0, kMaxX);
-    plot_ -> setAxisScale(QwtPlot::yLeft, 0, kMaxY);
+    plot_ -> setAxisScale(QwtPlot::xBottom, 0, Palette::kMaxX);
+    plot_ -> setAxisScale(QwtPlot::yLeft, 0, Palette::kMaxY);
 }
 
 void Drawer::DrawGraph(const Data& data) {
@@ -28,16 +29,16 @@ void Drawer::DrawGraph(const Data& data) {
 
 void Drawer::AddEdgeWithCapacity(const QPointF& begin, const QPointF& end, const Edge& edge) {
     QPointF bend = CalcEdgeBendPos(begin, end);
-    QPointF shift_head = SetVectorLength(end - bend, kCenterPadding);
-    QPointF shift_tail = SetVectorLength(bend - begin, kCenterPadding);
+    QPointF shift_head = SetVectorLength(end - bend, Palette::kCenterPadding);
+    QPointF shift_tail = SetVectorLength(bend - begin, Palette::kCenterPadding);
     AddEdge(begin + shift_tail, end - shift_head, edge);
     AddNumber(CalcEdgeNumberPos(begin + shift_tail, end - shift_head),
-              kGraphFont, GetEdgeNumberColor(edge), edge.delta);
+              Palette::kGraphFont, GetEdgeNumberColor(edge), edge.delta);
 }
 
 void Drawer::AddVertexWithId(const QPointF& pos, size_t num, Status status) {
-    AddVertex(pos, num, status);
-    AddNumber(pos, kGraphFont, GetVertexNumberColor(status), num);
+    AddVertex(pos, status);
+    AddNumber(pos, Palette::kGraphFont, GetVertexNumberColor(status), num);
 }
 
 void Drawer::AddEdge(const QPointF& begin, const QPointF& end, const Edge& data) {
@@ -47,17 +48,17 @@ void Drawer::AddEdge(const QPointF& begin, const QPointF& end, const Edge& data)
     QVector<QPointF> tail_points;
     tail_points << begin << bend << end;
     edge.tail.reset(new QwtPlotCurve());
-    edge.tail->setPen(GetEdgeColor(data), 2);
+    edge.tail->setPen(GetEdgeColor(data), Palette::kEdgeWidth);
     edge.tail->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.tail->setSamples(tail_points);
     edge.tail->attach(plot_.get());
 
     QVector<QPointF> head_points;
-    QPointF head_begin = RotateVector(bend, end, M_PI / 6 * 5, kEdgeHeadSide);
-    QPointF head_end = RotateVector(bend, end, -M_PI / 6 * 5, kEdgeHeadSide);
+    QPointF head_begin = RotateVector(end, bend, M_PI / 12 + M_PI / 60, Palette::kEdgeHeadSide);
+    QPointF head_end = RotateVector(end, bend, -M_PI / 12 + M_PI / 60, Palette::kEdgeHeadSide);
     head_points << head_begin << end << head_end;
     edge.head.reset(new QwtPlotCurve());
-    edge.head->setPen(GetEdgeColor(data), 2);
+    edge.head->setPen(GetEdgeColor(data), Palette::kEdgeWidth);
     edge.head->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.head->setSamples(head_points);
     edge.head->attach(plot_.get());
@@ -94,14 +95,14 @@ void Drawer::AddNumber(const QPointF& pos, const QFont& font, const QColor& colo
     numbers_.push_back(std::move(number));
 }
 
-void Drawer::AddVertex(const QPointF& pos, size_t index, Status status) {
+void Drawer::AddVertex(const QPointF& pos, Status status) {
     Vertex vertex;
     vertex.base.reset(new QwtPlotCurve());
     QwtSymbol* circle = new QwtSymbol();
     circle -> setStyle(QwtSymbol::Ellipse);
     circle -> setPen(GetBorderColor(status), 3);
     circle -> setBrush(GetVertexColor(status));
-    circle -> setSize(kVertexRadius);
+    circle -> setSize(Palette::kVertexRadius);
     vertex.base -> setSamples({pos});
     vertex.base -> setSymbol(circle);
     vertex.base -> attach(plot_.get());
@@ -109,7 +110,7 @@ void Drawer::AddVertex(const QPointF& pos, size_t index, Status status) {
 }
 
 QPointF Drawer::CalcEdgeNumberPos(const QPointF& begin, const QPointF& end) {
-    return CalcBendPos(begin, end, kCurveRate / 2);
+    return CalcBendPos(begin, end, Palette::kCurveRate / 2);
 }
 
 QPointF Drawer::CalcBendPos(const QPointF& begin, const QPointF& end, double rate) {
@@ -120,33 +121,41 @@ QPointF Drawer::CalcBendPos(const QPointF& begin, const QPointF& end, double rat
 }
 
 QPointF Drawer::CalcEdgeBendPos(const QPointF& begin, const QPointF& end) {
-    return CalcBendPos(begin, end, kCurveRate);
+    return CalcBendPos(begin, end, Palette::kCurveRate);
 }
 
 QColor Drawer::GetEdgeColor(const Edge& edge) const {
-    return kEdgeColor.at(edge.status);
+    return Palette::kEdgeColor.at(edge.status);
 }
 
 QColor Drawer::GetVertexColor(Status status) const {
-    return kVertexColor.at(status);
+    auto it = Palette::kVertexColor.find(status);
+    assert(it != Palette::kVertexColor.end());
+    return it -> second;
 }
 
 QColor Drawer::GetBorderColor(Status status) const {
-    return kBasicColor.at(status);
+    auto it = Palette::kBasicColor.find(status);
+    assert(it != Palette::kBasicColor.end());
+    return it -> second;
 }
 
 QColor Drawer::GetEdgeNumberColor(const Edge& edge) const {
-    return kBasicColor.at(edge.status);
+    auto it = Palette::kBasicColor.find(edge.status);
+    assert(it != Palette::kBasicColor.end());
+    return it -> second;
 }
 
 QColor Drawer::GetVertexNumberColor(Status status) const{
-    return kBasicColor.at(status);
+    auto it = Palette::kBasicColor.find(status);
+    assert(it != Palette::kBasicColor.end());
+    return it -> second;
 }
 
 QPointF Drawer::RotateVector(const QPointF& begin, const QPointF& end,  double angle, double len) {
     QPointF direction(end - begin);
-    double polar = atan2(direction.x(), direction.y());
-    QPointF res = end + QPointF(sin(polar + angle) * len, cos(polar + angle) * len);
+    double polar = atan2(direction.y(), direction.x());
+    QPointF res = begin + QPointF(cos(polar + angle) * len, sin(polar + angle) * len);
     return res;
 }
 
@@ -157,18 +166,18 @@ QPointF Drawer::SetVectorLength(QPointF vec, double len) {
 
 QPointF Drawer::GetVertexPosById(size_t number, size_t index) {
     if (!index) {
-        return QPointF(kMaxX * kSinkPadingRate, kMaxY / 2);
+        return QPointF(Palette::kMaxX * Palette::kSinkPadingRate, Palette::kMaxY / 2);
     }
     if (index + 1 == number) {
-        return QPointF(kMaxX * (1 - kSinkPadingRate), kMaxY / 2);
+        return QPointF(Palette::kMaxX * (1 - Palette::kSinkPadingRate), Palette::kMaxY / 2);
     }
     if (index & 1u) {
-        return QPointF(kMaxX / 2, kMaxY / 2) +
-               RotateVector({0, 0}, {0, 1},
-                            M_PI / ((number + 1) / 2) * (index + 1) / 2, kMaxX * (0.5 - kSinkPadingRate));
+        return QPointF(Palette::kMaxX / 2, Palette::kMaxY / 2) +
+               RotateVector({0, 0}, {1, 0},
+                            M_PI / ((number + 1) / 2) * ((index + 1) / 2), Palette::kMaxX * (0.5 - Palette::kSinkPadingRate));
     }
-    return QPointF(kMaxX / 2, kMaxY / 2) +
-           RotateVector({0, 0}, {0, 1},
-                        -M_PI / (number / 2) * (index + 1) / 2, kMaxX * (0.5 - kSinkPadingRate));
+    return QPointF(Palette::kMaxX / 2, Palette::kMaxY / 2) +
+           RotateVector({0, 0}, {1, 0},
+                        -M_PI / (number / 2) * ((index + 1) / 2), Palette::kMaxX * (0.5 - Palette::kSinkPadingRate));
 }
 }

@@ -14,12 +14,12 @@ public:
 
     using ReceivingData = mvc_messages::MaxFlowData;
     using SendingData = mvc_messages::CommandData;
-    using GraphObserver = observer_pattern::Observer<ReceivingData>;
+    using GeomModelObserver = observer_pattern::Observer<ReceivingData>;
     using CommandObservable = observer_pattern::Observable<SendingData>;
     using CommandObserver = observer_pattern::Observer<SendingData>;
     using BasicEdge = mvc_messages::BasicEdge;
 
-    GraphObserver* GetSubscriberPtr();
+    GeomModelObserver* GetSubscriberPtr();
 
     SendingData message_;
 
@@ -30,7 +30,8 @@ public slots:
     void ApplyButtonPressed();
     void AddButtonPressed();
     void DeleteButtonPressed();
-    void GoNextButtonPressed();
+    void RunButtonPressed();
+    void GenRandomSampleButtonPressed();
 
 private:
 
@@ -38,7 +39,7 @@ private:
 
     MainWindow main_window_;
     Drawer drawer_;
-    GraphObserver graph_observer_;
+    GeomModelObserver geom_model_observer_;
     CommandObservable command_observable_;
 };
 }

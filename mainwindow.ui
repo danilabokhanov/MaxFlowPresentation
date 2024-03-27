@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1179</width>
+    <height>910</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,8 +22,8 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>621</width>
-      <height>531</height>
+      <width>1001</width>
+      <height>851</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -39,7 +39,7 @@
    <widget class="QFrame" name="frame_vertices">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>1020</x>
       <y>10</y>
       <width>151</width>
       <height>181</height>
@@ -112,10 +112,10 @@ number</string>
    <widget class="QFrame" name="frame_edges">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>1020</x>
       <y>200</y>
       <width>151</width>
-      <height>271</height>
+      <height>221</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -130,9 +130,9 @@ number</string>
     <widget class="QLabel" name="label_edge">
      <property name="geometry">
       <rect>
-       <x>30</x>
+       <x>40</x>
        <y>10</y>
-       <width>81</width>
+       <width>71</width>
        <height>31</height>
       </rect>
      </property>
@@ -146,7 +146,7 @@ number</string>
     <widget class="QSpinBox" name="spinBox_u">
      <property name="geometry">
       <rect>
-       <x>90</x>
+       <x>80</x>
        <y>50</y>
        <width>51</width>
        <height>31</height>
@@ -156,7 +156,7 @@ number</string>
     <widget class="QSpinBox" name="spinBox_v">
      <property name="geometry">
       <rect>
-       <x>90</x>
+       <x>80</x>
        <y>90</y>
        <width>51</width>
        <height>31</height>
@@ -166,7 +166,7 @@ number</string>
     <widget class="QSpinBox" name="spinBox_weight">
      <property name="geometry">
       <rect>
-       <x>90</x>
+       <x>80</x>
        <y>130</y>
        <width>51</width>
        <height>31</height>
@@ -224,9 +224,9 @@ number</string>
     <widget class="QPushButton" name="button_add">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>10</x>
        <y>170</y>
-       <width>111</width>
+       <width>51</width>
        <height>41</height>
       </rect>
      </property>
@@ -237,9 +237,9 @@ number</string>
     <widget class="QPushButton" name="button_delete">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>220</y>
-       <width>111</width>
+       <x>70</x>
+       <y>170</y>
+       <width>71</width>
        <height>41</height>
       </rect>
      </property>
@@ -248,13 +248,13 @@ number</string>
      </property>
     </widget>
    </widget>
-   <widget class="QFrame" name="frame_go_next">
+   <widget class="QFrame" name="frame_run">
     <property name="geometry">
      <rect>
-      <x>640</x>
-      <y>480</y>
+      <x>1020</x>
+      <y>430</y>
       <width>151</width>
-      <height>61</height>
+      <height>111</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -266,7 +266,20 @@ number</string>
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QPushButton" name="button_go_next">
+    <widget class="QPushButton" name="button_run">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>131</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>GO NEXT</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_random_sample">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -275,8 +288,13 @@ number</string>
        <height>41</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
      <property name="text">
-      <string>GO NEXT</string>
+      <string>RANDOM SAMPLE</string>
      </property>
     </widget>
    </widget>
@@ -286,7 +304,7 @@ number</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1179</width>
      <height>22</height>
     </rect>
    </property>

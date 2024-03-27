@@ -2,7 +2,10 @@
 
 namespace max_flow_app {
 Application::Application(): controller_(&model_) {
-    model_.RegisterView(view_.GetSubscriberPtr());
+    model_.RegisterNetworkObserver(geom_model_.GetNetworkObserverPtr());
+    model_.RegisterFlowObserver(geom_model_.GetFlowObserverPtr());
+    model_.RegisterCleanupObserver(geom_model_.GetClearSignalObserver());
+    geom_model_.RegisterView(view_.GetSubscriberPtr());
     view_.RegisterController(controller_.GetSubscriberPtr());
 }
 }

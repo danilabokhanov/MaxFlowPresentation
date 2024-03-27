@@ -7,7 +7,9 @@ namespace max_flow_app {
 View::View():
       main_window_(),
       drawer_(main_window_.GetQwtFramePtr()),
-      graph_observer_([this](const ReceivingData& data) {UpdateGraphView(data);}),
+      geom_model_observer_([this](const ReceivingData& data) {UpdateGraphView(data);},
+                               [this](const ReceivingData& data) {UpdateGraphView(data);},
+                               [](const ReceivingData&) {}),
       command_observable_([this]() {return ProduceViewMessage();}) {
     connect(main_window_.GetVerticesButtonPtr(), &QPushButton::clicked, this,
             &View::ApplyButtonPressed);
@@ -15,13 +17,15 @@ View::View():
             &View::AddButtonPressed);
     connect(main_window_.GetDeleteButtonPtr(), &QPushButton::clicked, this,
             &View::DeleteButtonPressed);
-    connect(main_window_.GetGoNextButtonPtr(), &QPushButton::clicked, this,
-            &View::GoNextButtonPressed);
+    connect(main_window_.GetRunButtonPtr(), &QPushButton::clicked, this,
+            &View::RunButtonPressed);
+    connect(main_window_.GetRandomSampleButtonPtr(), &QPushButton::clicked, this,
+            &View::GenRandomSampleButtonPressed);
     main_window_.show();
 }
 
-View::GraphObserver* View::GetSubscriberPtr() {
-    return &graph_observer_;
+View::GeomModelObserver* View::GetSubscriberPtr() {
+    return &geom_model_observer_;
 }
 
 void View::ApplyButtonPressed() {
@@ -56,9 +60,16 @@ void View::DeleteButtonPressed() {
     command_observable_.Notify();
 }
 
-void View::GoNextButtonPressed() {
+void View::RunButtonPressed() {
     std::cout << "go next\n";
-    message_.signal_type = SendingData::GO_NEXT;
+    message_.signal_type = SendingData::RUN;
+    message_.args = SendingData::Empty{};
+    command_observable_.Notify();
+}
+
+void View::GenRandomSampleButtonPressed() {
+    std::cout << "random sample\n";
+    message_.signal_type = SendingData::GEN_RANDOM_SAMPLE;
     message_.args = SendingData::Empty{};
     command_observable_.Notify();
 }

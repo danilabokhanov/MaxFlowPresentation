@@ -44,7 +44,11 @@ QPushButton* MainWindow::GetDeleteButtonPtr() const {
     return ui_ -> button_delete;
 }
 
-QPushButton* MainWindow::GetGoNextButtonPtr() const {
-    return ui_ -> button_go_next;
+QPushButton* MainWindow::GetRunButtonPtr() const {
+    return ui_ -> button_run;
+}
+
+QPushButton* MainWindow::GetRandomSampleButtonPtr() const {
+    return ui_ -> button_random_sample;
 }
 }

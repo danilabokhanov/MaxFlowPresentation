@@ -30,8 +30,8 @@ public:
     QSpinBox* GetWeightSpinBoxPtr() const;
     QPushButton* GetAddButtonPtr() const;
     QPushButton* GetDeleteButtonPtr() const;
-    QPushButton* GetGoNextButtonPtr() const;
-
+    QPushButton* GetRunButtonPtr() const;
+    QPushButton* GetRandomSampleButtonPtr() const;
 private:
 
     std::unique_ptr<Ui::MainWindow> ui_;

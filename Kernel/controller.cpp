@@ -8,19 +8,23 @@ Controller::Controller(MaxFlow* model_ptr): model_ptr_(model_ptr),
 }
 
 void Controller::CallChangeVerticesNumber(size_t new_number) {
-    model_ptr_ -> ChangeVerticesNumber(new_number);
+    model_ptr_ -> ChangeVerticesNumberRequest(new_number);
 }
 
 void Controller::CallAddEdge(const MaxFlow::BasicEdge &edge) {
-    model_ptr_ -> AddEdge(edge);
+    model_ptr_ -> AddEdgeRequest(edge);
 }
 
 void Controller::CallDeleteEdge(const MaxFlow::BasicEdge &edge) {
-    model_ptr_ -> DeleteEdge(edge);
+    model_ptr_ -> DeleteEdgeRequest(edge);
 }
 
-void Controller::CallGoNext() {
-    model_ptr_ -> GoNext();
+void Controller::CallRun() {
+    model_ptr_ -> RunRequest();
+}
+
+void Controller::CallGenRandomSample() {
+    model_ptr_ -> GenRandomSampleRequest();
 }
 
 Controller::ViewObserver* Controller::GetSubscriberPtr() {
@@ -38,8 +42,11 @@ void Controller::HandleData(const CommandData& data) {
         case CommandData::DELETE_EDGE:
             CallDeleteEdge(std::get<MaxFlow::BasicEdge> (data.args));
             break;
+        case CommandData::RUN:
+            CallRun();
+            break;
         default:
-            CallGoNext();
+            CallGenRandomSample();
             break;
     }
 }

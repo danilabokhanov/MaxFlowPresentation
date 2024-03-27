@@ -19,8 +19,8 @@ struct Edge {
 };
 
 struct MaxFlowData {
-    std::vector<Edge> edges_;
-    std::vector<Status> vertices_;
+    std::vector<Edge> edges;
+    std::vector<Status> vertices;
 };
 
 struct CommandData {
@@ -32,7 +32,8 @@ struct CommandData {
         CHANGE_VERTICES_NUMBER,
         ADD_EDGE,
         DELETE_EDGE,
-        GO_NEXT
+        RUN,
+        GEN_RANDOM_SAMPLE
     } signal_type;
     std::variant<size_t, BasicEdge, Empty> args;
 };

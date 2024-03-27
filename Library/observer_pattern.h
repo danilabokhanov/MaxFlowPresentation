@@ -62,10 +62,9 @@ public:
     }
 
 private:
-    template <class W>
-    friend class Observable;
+    friend class Observable<DataType>;
 
-    static void DefaultOnCallFunc(DataType) {
+    static void DefaultOnCallFunc(const DataType&) {
     }
 
     std::function<void(const DataType&)> subscribe_func_ = DefaultOnCallFunc;
@@ -116,8 +115,7 @@ public:
     }
 
 private:
-    template <class W>
-    friend class Observer;
+    friend class Observer<DataType>;
 
     static DataType DefaultDataProducer() {
         return {};
@@ -132,5 +130,121 @@ private:
     std::function<DataType()> data_producer_ = DefaultDataProducer;
     std::list<SubscriberPtr> subscribers_;
 };
+
+template <>
+class Observable<void>;
+
+template <>
+class Observer<void> {
+public:
+    using Connection = Observable<void>*;
+    template <class SubscribeFunc, class NotifyFunc, class UnsubscribeFunc>
+    Observer(SubscribeFunc&& subscribe_func, NotifyFunc&& notify_func,
+             UnsubscribeFunc&& unsubscribe_func)
+        : subscribe_func_(std::forward<SubscribeFunc>(subscribe_func)),
+          notify_func_(std::forward<NotifyFunc>(notify_func)),
+          unsubscribe_func_(std::forward<UnsubscribeFunc>(unsubscribe_func)) {
+    }
+
+    template <class UnifiedFunc>
+    Observer(UnifiedFunc&& unified_func)
+        : subscribe_func_(unified_func),
+          notify_func_(unified_func),
+          unsubscribe_func_(std::forward<UnifiedFunc>(unified_func)) {
+    }
+
+    Observer() = default;
+    Observer(const Observer&) = delete;
+    Observer(Observer&&) = delete;
+    Observer& operator=(const Observer&) = delete;
+    Observer& operator=(Observer&&) = delete;
+
+    void Unsubscribe();
+
+    void OnSubscribe() const {
+        subscribe_func_();
+    }
+
+    void OnNotify() const {
+        notify_func_();
+    }
+
+    void OnUnsubscribe() const {
+        unsubscribe_func_();
+    }
+
+    bool IsConnected() const {
+        return connection_;
+    };
+
+    ~Observer() {
+        Unsubscribe();
+    }
+
+private:
+    friend class Observable<void>;
+
+    static void DefaultOnCallFunc() {
+    }
+
+    std::function<void()> subscribe_func_ = DefaultOnCallFunc;
+    std::function<void()> notify_func_ = DefaultOnCallFunc;
+    std::function<void()> unsubscribe_func_ = DefaultOnCallFunc;
+    Connection connection_ = nullptr;
+};
+
+template <>
+class Observable<void> {
+public:
+    using SubscriberPtr = Observer<void>*;
+
+    Observable() = default;
+    Observable(const Observable&) = delete;
+    Observable(Observable&&) = delete;
+    Observable& operator=(const Observable&) = delete;
+    Observable& operator=(Observable&&) = delete;
+
+    void Subscribe(SubscriberPtr consumer) {
+        assert(consumer);
+
+        subscribers_.push_back(consumer);
+        consumer->connection_ = this;
+        consumer->OnSubscribe();
+    }
+
+    void Notify() {
+        for (auto ptr : subscribers_) {
+            ptr->OnNotify();
+        }
+    }
+
+    ~Observable() {
+        for (size_t i = subscribers_.size(); i != 0; i--) {
+            subscribers_.back()->Unsubscribe();
+        }
+    }
+
+private:
+    friend class Observer<void>;
+
+    static void DefaultDataProducer() {
+    }
+
+    void Disconnect(SubscriberPtr ptr) {
+        assert(ptr);
+        ptr->OnUnsubscribe();
+        subscribers_.remove(ptr);
+    }
+
+    std::list<SubscriberPtr> subscribers_;
+};
+
+inline void Observer<void>::Unsubscribe() {
+    if (!IsConnected()) {
+        return;
+    }
+    connection_->Disconnect(this);
+    connection_ = nullptr;
+}
 }  // namespace observer_pattern
 #endif  // OBSERVER_PATTERN_H

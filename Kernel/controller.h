@@ -19,7 +19,8 @@ private:
     void CallChangeVerticesNumber(size_t new_number);
     void CallAddEdge(const BasicEdge &edge);
     void CallDeleteEdge(const BasicEdge& egde);
-    void CallGoNext();
+    void CallRun();
+    void CallGenRandomSample();
 
     void HandleData(const CommandData& data);
     MaxFlow* model_ptr_;
