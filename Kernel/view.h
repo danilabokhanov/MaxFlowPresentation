@@ -12,7 +12,7 @@ class View : public QObject {
 public:
     View();
 
-    using ReceivingData = mvc_messages::MaxFlowData;
+    using ReceivingData = mvc_messages::GeomModelData;
     using SendingData = mvc_messages::CommandData;
     using GeomModelObserver = observer_pattern::Observer<ReceivingData>;
     using CommandObservable = observer_pattern::Observable<SendingData>;

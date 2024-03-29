@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstddef>
 #include <variant>
+#include <string>
 
 namespace max_flow_app {
 namespace mvc_messages {
@@ -21,6 +22,15 @@ struct Edge {
 struct MaxFlowData {
     std::vector<Edge> edges;
     std::vector<Status> vertices;
+    size_t update_edge = std::string::npos;
+};
+
+struct GeomModelData {
+    std::vector<Edge> edges;
+    std::vector<Status> vertices;
+    size_t edge_id = std::string::npos;
+    size_t frame_id;
+    size_t frames_number;
 };
 
 struct CommandData {
@@ -38,6 +48,7 @@ struct CommandData {
     std::variant<size_t, BasicEdge, Empty> args;
 };
 
+Status GetPreviousStatus(Status status);
 }
 }
 

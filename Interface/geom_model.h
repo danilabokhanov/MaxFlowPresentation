@@ -11,11 +11,12 @@ class GeomModel: public QObject {
     Q_OBJECT
 public:
     using MaxFlowData = mvc_messages::MaxFlowData;
+    using GeomModelData = mvc_messages::GeomModelData;
     using NetworkObserver = observer_pattern::Observer<MaxFlowData>;
     using FlowObserver = observer_pattern::Observer<MaxFlowData>;
     using ClearSignalObserver = observer_pattern::Observer<void>;
-    using StateObservable = observer_pattern::Observable<MaxFlowData>;
-    using StateObserver = observer_pattern::Observer<MaxFlowData>;
+    using StateObservable = observer_pattern::Observable<GeomModelData>;
+    using StateObserver = observer_pattern::Observer<GeomModelData>;
 
     GeomModel();
     void RegisterView(StateObserver* observer);
@@ -23,14 +24,15 @@ public:
     FlowObserver* GetFlowObserverPtr();
     ClearSignalObserver* GetClearSignalObserver();
 
+    static size_t GetFPSRate();
 private slots:
    void ProcessNextState();
 
 private:
-    static const size_t kFPSRate = 20;
+    static const size_t kFPSRate = 60;
     static const size_t kTimerInterval = 1000 / kFPSRate;
     std::unique_ptr<QTimer> timer_;
-    std::deque<MaxFlowData> states_;
+    std::deque<GeomModelData> states_;
     NetworkObserver network_observer_ = NetworkObserver(
        [this](const MaxFlowData& data) {AddStaticState(data);},
        [this](const MaxFlowData& data) {AddStaticState(data);},
@@ -45,7 +47,7 @@ private:
         []() {});
     StateObservable geom_model_observable_ = StateObservable([this]() {
         if (states_.empty()) {
-            return MaxFlowData{};
+            return GeomModelData{};
         }
         auto state =  std::move(states_.front());
         states_.pop_front();

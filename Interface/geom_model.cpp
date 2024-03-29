@@ -30,12 +30,15 @@ void GeomModel::ProcessNextState() {
 
 void GeomModel::AddDynamicState(const MaxFlowData& data) {
     for (size_t i = 0; i < kFPSRate; i++) {
-        states_.push_back(data);
+        states_.push_back(GeomModelData{.edges = data.edges,
+            .vertices = data.vertices, .edge_id = data.update_edge,
+            .frame_id = i, .frames_number = kFPSRate});
     }
 }
 
 void GeomModel::AddStaticState(const MaxFlowData& data) {
-    states_.push_back(data);
+    states_.push_back(GeomModelData{.edges = data.edges, .vertices = data.vertices,
+                                    .edge_id = std::string::npos});
 }
 
 void GeomModel::ClearStateQueue() {
@@ -48,4 +51,7 @@ void GeomModel::StartTimer() {
     timer_ -> start();
 }
 
+size_t GeomModel::GetFPSRate() {
+    return kFPSRate;
+}
 }

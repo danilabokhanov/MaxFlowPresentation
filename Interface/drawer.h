@@ -7,19 +7,19 @@
 #include <QwtPlotMarker>
 #include <QwtText>
 #include "qwt_plot.h"
-#include "palette.h"
+#include "drawer_setup.h"
 
 namespace max_flow_app {
 class Drawer {
 public:
     using Edge = mvc_messages::Edge;
-    using Data = mvc_messages::MaxFlowData;
+    using Data = mvc_messages::GeomModelData;
     using Status = mvc_messages::Status;
 
     Drawer(QFrame* frame);
     void DrawGraph(const Data& data);
 private:
-    inline static const Palette pattle;
+    inline static const DrawerSetup pattle;
 
     std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<QwtPlot> plot_;
@@ -41,10 +41,15 @@ private:
     std::list<CurveEdge> edges_;
     std::list<Number> numbers_;
 
-    void AddEdge(const QPointF& begin, const QPointF& end, const Edge& edge);
+    void AddStaticEdge(const QPointF& begin, const QPointF& end, const Edge& edge);
+    void AddDynamicEdge(const QPointF& begin, const QPointF& end,
+                        const Edge& edge, size_t frame_id, size_t frames_number);
     void AddVertex(const QPointF& pos, Status status);
     void AddNumber(const QPointF& pos, const QFont& font, const QColor& color, size_t num);
-    void AddEdgeWithCapacity(const QPointF& begin, const QPointF& end, const Edge& edge);
+    void AddStaticEdgeWithCapacity(const QPointF& begin, const QPointF& end,
+                             const Edge& edge);
+    void AddDynamicEdgeWithCapacity(const QPointF& begin, const QPointF& end,
+                                   const Edge& edge, size_t frame_id, size_t frames_number);
     void AddVertexWithId(const QPointF& pos, size_t num, Status status);
 
     QPointF CalcEdgeNumberPos(const QPointF& begin, const QPointF& end);
@@ -53,7 +58,7 @@ private:
     QPointF RotateVector(const QPointF& begin, const QPointF& end,  double angle, double len);
     QPointF SetVectorLength(QPointF vec, double len);
     QPointF GetVertexPosById(size_t number, size_t index);
-    QColor GetEdgeColor(const Edge& edge) const;
+    QColor GetEdgeColor(Status status) const;
     QColor GetVertexColor(Status status) const;
     QColor GetBorderColor(Status status) const;
     QColor GetEdgeNumberColor(const Edge& edge) const;

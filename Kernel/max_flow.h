@@ -6,6 +6,7 @@
 #include "Library/observer_pattern.h"
 #include "mvc_messages.h"
 #include <random>
+#include <string>
 
 namespace max_flow_app {
 class MaxFlow {
@@ -66,6 +67,7 @@ private:
     std::vector<size_t> processed_neighbors_ = std::vector<size_t>(n_);
     std::vector<Edge> edges_;
     std::vector<Status> vertices_ = std::vector<Status>(n_, Status::Basic);
+    size_t updated_edge_ = std::string::npos;
 
     size_t flow_rate_ = 0, pushed_flow_ = 0;
 

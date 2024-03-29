@@ -18,6 +18,7 @@ LIBS += $$CONAN_LIBDIRS_QWT $$CONAN_LIBS_QWT
 
 SOURCES += \
     Interface/geom_model.cpp \
+    Kernel/mvc_messages.cpp \
     application.cpp \
     Kernel/controller.cpp \
     Interface/drawer.cpp \
@@ -36,7 +37,7 @@ HEADERS += \
     Kernel/max_flow.h \
     Library/observer_pattern.h \
     Kernel/view.h \
-    palette.h
+    drawer_setup.h
 
 FORMS += \
     mainwindow.ui
