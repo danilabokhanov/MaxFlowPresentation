@@ -41,10 +41,6 @@ void GeomModel::AddStaticState(const MaxFlowData& data) {
                                     .edge_id = std::string::npos});
 }
 
-void GeomModel::ClearStateQueue() {
-    states_.clear();
-}
-
 void GeomModel::StartTimer() {
     connect(timer_.get(), &QTimer::timeout, this, &GeomModel::ProcessNextState);
     timer_ -> setInterval(kTimerInterval);
@@ -53,5 +49,11 @@ void GeomModel::StartTimer() {
 
 size_t GeomModel::GetFPSRate() {
     return kFPSRate;
+}
+
+void GeomModel::SkipFrames() {
+    while (states_.size() > 1u) {
+        states_.pop_front();
+    }
 }
 }

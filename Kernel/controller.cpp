@@ -1,8 +1,8 @@
 #include "controller.h"
 
 namespace max_flow_app {
-Controller::Controller(MaxFlow* model_ptr): model_ptr_(model_ptr),
-      view_observer_([] (const CommandData&){},
+Controller::Controller(MaxFlow* model_ptr, GeomModel* geom_model_ptr): model_ptr_(model_ptr),
+      geom_model_ptr_(geom_model_ptr), view_observer_([] (const CommandData&){},
                      [this] (const CommandData& data) {HandleData(data);},
                      [] (const CommandData&){}) {
 }
@@ -27,6 +27,14 @@ void Controller::CallGenRandomSample() {
     model_ptr_ -> GenRandomSampleRequest();
 }
 
+void Controller::CallCancel() {
+    model_ptr_ -> RecoverPrevStateRequest();
+}
+
+void Controller::CallSkip() {
+    geom_model_ptr_ -> SkipFrames();
+}
+
 Controller::ViewObserver* Controller::GetSubscriberPtr() {
     return &view_observer_;
 }
@@ -45,8 +53,14 @@ void Controller::HandleData(const CommandData& data) {
         case CommandData::RUN:
             CallRun();
             break;
-        default:
+        case CommandData::GEN_RANDOM_SAMPLE:
             CallGenRandomSample();
+            break;
+        case CommandData::CANCEL:
+            CallCancel();
+            break;
+        case CommandData::SKIP:
+            CallSkip();
             break;
     }
 }

@@ -43,7 +43,9 @@ struct CommandData {
         ADD_EDGE,
         DELETE_EDGE,
         RUN,
-        GEN_RANDOM_SAMPLE
+        GEN_RANDOM_SAMPLE,
+        CANCEL,
+        SKIP
     } signal_type;
     std::variant<size_t, BasicEdge, Empty> args;
 };

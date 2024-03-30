@@ -254,7 +254,7 @@ number</string>
       <x>1020</x>
       <y>430</y>
       <width>151</width>
-      <height>111</height>
+      <height>231</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -270,13 +270,18 @@ number</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
+       <y>160</y>
        <width>131</width>
-       <height>41</height>
+       <height>61</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
      <property name="text">
-      <string>GO NEXT</string>
+      <string>RUN</string>
      </property>
     </widget>
     <widget class="QPushButton" name="button_random_sample">
@@ -295,6 +300,42 @@ number</string>
      </property>
      <property name="text">
       <string>RANDOM SAMPLE</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_cancel">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>131</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>CANCEL</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_skip">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>131</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>SKIP</string>
      </property>
     </widget>
    </widget>

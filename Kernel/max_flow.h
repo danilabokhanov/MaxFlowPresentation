@@ -24,6 +24,7 @@ public:
     void DeleteEdgeRequest(const BasicEdge& egde);
     void RunRequest();
     void GenRandomSampleRequest();
+    void RecoverPrevStateRequest();
 
     size_t GetCurrentFlow() const;
 
@@ -35,7 +36,7 @@ public:
 
 private:
     inline static const size_t kMinVerticesNum = 2, kMaxVerticesNum = 10,
-        kMaxEdgeCapacity = 100;
+        kMaxEdgeCapacity = 100, kStatesStorageSize = 10;
 
     bool FindNetwork();
     void SetPathToBasicStatus(const std::vector<size_t>& path);
@@ -59,6 +60,8 @@ private:
     void SetEdgeStatus(size_t index, Status status);
 
     void ResetState();
+    void SaveState();
+
     size_t GenRandNum(size_t l, size_t r);
 
     size_t n_ = 2, m_ = 0;
@@ -73,12 +76,19 @@ private:
 
     observer_pattern::Observable<Data> network_observable_ =
         observer_pattern::Observable<Data> ([this] () {return GetData();});
-
     observer_pattern::Observable<Data> flow_observable_ =
         observer_pattern::Observable<Data> ([this] () {return GetData();});
-
     observer_pattern::Observable<void> сleanup_observable_;
+
     std::mt19937 rand_generator_;
+
+    struct State {
+        size_t n, m, flow_rate = 0;
+        std::vector<size_t> capacity;
+        std::vector<std::vector<size_t>> graph;
+        std::vector<BasicEdge> edges;
+    };
+    std::deque<State> previous_states_;
 };
 
 }

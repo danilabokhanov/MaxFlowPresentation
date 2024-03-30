@@ -51,4 +51,12 @@ QPushButton* MainWindow::GetRunButtonPtr() const {
 QPushButton* MainWindow::GetRandomSampleButtonPtr() const {
     return ui_ -> button_random_sample;
 }
+
+QPushButton* MainWindow::GetSkipButtonPtr() const {
+    return ui_ -> button_skip;
+}
+
+QPushButton* MainWindow::GetCancelButtonPtr() const {
+    return ui_ -> button_cancel;
+}
 }

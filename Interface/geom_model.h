@@ -23,8 +23,9 @@ public:
     NetworkObserver* GetNetworkObserverPtr();
     FlowObserver* GetFlowObserverPtr();
     ClearSignalObserver* GetClearSignalObserver();
-
+    void SkipFrames();
     static size_t GetFPSRate();
+
 private slots:
    void ProcessNextState();
 
@@ -43,7 +44,7 @@ private:
         [](const MaxFlowData&) {});
     ClearSignalObserver clear_signal_observer_ = ClearSignalObserver(
         []() {},
-        [this]() {ClearStateQueue();},
+        [this]() {SkipFrames();},
         []() {});
     StateObservable geom_model_observable_ = StateObservable([this]() {
         if (states_.empty()) {
@@ -56,7 +57,6 @@ private:
 
     void AddDynamicState(const MaxFlowData& data);
     void AddStaticState(const MaxFlowData& data);
-    void ClearStateQueue();
     void StartTimer();
 };
 }

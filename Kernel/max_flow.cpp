@@ -13,6 +13,7 @@ MaxFlow::MaxFlow(size_t n, size_t m, const std::vector<BasicEdge> &edges)
 }
 
 void MaxFlow::RunRequest() {
+    SaveState();
     while (true) {
         while (!FindNetwork()) {
             if (flow_rate_ == 0) {
@@ -43,11 +44,13 @@ size_t MaxFlow::FindEdge(const MaxFlow::BasicEdge& edge) {
 }
 
 void MaxFlow::AddEdgeRequest(const MaxFlow::BasicEdge &edge) {
+    SaveState();
     AddEdge(edge);
     ResetState();
 }
 
 void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge &edge) {
+    SaveState();
     size_t index = 0;
     for (Edge &e : edges_) {
         if (e.u == edge.u && e.to == edge.to) {
@@ -101,6 +104,7 @@ void MaxFlow::ExtendNetwork(size_t vertex, std::vector<bool>& used,
 
 void MaxFlow::ChangeNewEdgeStatus(size_t vertex, const std::vector<ssize_t>& parent) {
     std::cout << "vertex: " << vertex << "\n";
+    SaveState();
     if (vertex) {
         edges_[parent[vertex]].status = Status::OnTheNetwork;
         updated_edge_ = parent[vertex];
@@ -248,6 +252,7 @@ void MaxFlow::RegisterCleanupObserver(observer_pattern::Observer<void>* observer
 }
 
 void MaxFlow::ChangeVerticesNumberRequest(size_t new_number) {
+    SaveState();
     vertices_.resize(new_number, Status::Basic);
     std::vector<Edge> new_edges;
     std::vector<std::vector<size_t>> new_graph(new_number);
@@ -286,6 +291,7 @@ void MaxFlow::AddEdge(const BasicEdge& edge) {
 }
 
 void MaxFlow::GenRandomSampleRequest() {
+    SaveState();
     n_ = GenRandNum(kMinVerticesNum, kMaxVerticesNum);
     m_ = 0;
     edges_.clear();
@@ -334,4 +340,37 @@ void MaxFlow::SetGraphToBasicStatus() {
     flow_observable_.Notify();
 }
 
+void MaxFlow::SaveState() {
+    State state{.n = n_, .m = m_, .flow_rate = flow_rate_, .graph = graph_};
+    std::vector<BasicEdge> edges;
+    for (auto [u, to, delta, _] : edges_) {
+        edges.push_back({u, to, delta});
+    }
+    state.edges = std::move(edges);
+    previous_states_.push_back(std::move(state));
+    while (previous_states_.size() > kStatesStorageSize) {
+        previous_states_.pop_front();
+    }
+}
+
+void MaxFlow::RecoverPrevStateRequest() {
+    if (previous_states_.empty()) {
+        return;
+    }
+    State state = std::move(previous_states_.back());
+    previous_states_.pop_back();
+    n_ = state.n;
+    m_ = state.m;
+    flow_rate_ = state.flow_rate;
+    pushed_flow_ = 0;
+    graph_ = std::move(state.graph);
+    edges_.clear();
+    vertices_.resize(n_);
+    for (auto [u, to, delta] : state.edges) {
+        edges_.push_back({.u = u, .to = to,
+                          .delta = delta, .status = Status::Basic});
+    }
+    network_observable_.Notify();
+    сleanup_observable_.Notify();
+}
 }

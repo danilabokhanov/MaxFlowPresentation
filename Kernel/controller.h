@@ -4,6 +4,7 @@
 #include "Library/observer_pattern.h"
 #include "mvc_messages.h"
 #include "max_flow.h"
+#include "Interface/geom_model.h"
 
 namespace max_flow_app {
 class Controller {
@@ -12,7 +13,7 @@ public:
     using CommandData = mvc_messages::CommandData;
     using ViewObserver = observer_pattern::Observer<CommandData>;
 
-    Controller(MaxFlow* model_ptr);
+    Controller(MaxFlow* model_ptr, GeomModel* geom_model_ptr);
     ViewObserver* GetSubscriberPtr();
 
 private:
@@ -21,9 +22,12 @@ private:
     void CallDeleteEdge(const BasicEdge& egde);
     void CallRun();
     void CallGenRandomSample();
+    void CallCancel();
+    void CallSkip();
 
     void HandleData(const CommandData& data);
     MaxFlow* model_ptr_;
+    GeomModel* geom_model_ptr_;
     ViewObserver view_observer_;
 };
 }

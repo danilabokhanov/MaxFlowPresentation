@@ -32,6 +32,8 @@ public:
     QPushButton* GetDeleteButtonPtr() const;
     QPushButton* GetRunButtonPtr() const;
     QPushButton* GetRandomSampleButtonPtr() const;
+    QPushButton* GetCancelButtonPtr() const;
+    QPushButton* GetSkipButtonPtr() const;
 private:
 
     std::unique_ptr<Ui::MainWindow> ui_;

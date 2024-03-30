@@ -32,9 +32,12 @@ public slots:
     void DeleteButtonPressed();
     void RunButtonPressed();
     void GenRandomSampleButtonPressed();
+    void CancelButtonPressed();
+    void SkipButtonPressed();
 
 private:
-
+    void LockInterface();
+    void UnlockInterface();
     void UpdateGraphView(const ReceivingData& data);
 
     MainWindow main_window_;
