@@ -17,10 +17,10 @@ void MaxFlow::RunRequest() {
     while (true) {
         while (!FindNetwork()) {
             if (flow_rate_ == 0) {
-                ResetState();
+                SetGraphToBasicStatus(false);
                 return;
             }
-            SetGraphToBasicStatus();
+            SetGraphToBasicStatus(true);
             flow_rate_--;
         }
         std::vector<size_t> path;
@@ -30,7 +30,7 @@ void MaxFlow::RunRequest() {
             SetPathToBasicStatus(path);
             path.clear();
         }
-        SetGraphToBasicStatus();
+        SetGraphToBasicStatus(true);
     }
 }
 
@@ -47,6 +47,7 @@ void MaxFlow::AddEdgeRequest(const MaxFlow::BasicEdge &edge) {
     SaveState();
     AddEdge(edge);
     ResetState();
+    ResetFlowInfo();
 }
 
 void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge &edge) {
@@ -84,6 +85,7 @@ void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge &edge) {
     }
     m_--;
     ResetState();
+    ResetFlowInfo();
 }
 
 void MaxFlow::ExtendNetwork(size_t vertex, std::vector<bool>& used,
@@ -104,7 +106,6 @@ void MaxFlow::ExtendNetwork(size_t vertex, std::vector<bool>& used,
 
 void MaxFlow::ChangeNewEdgeStatus(size_t vertex, const std::vector<ssize_t>& parent) {
     std::cout << "vertex: " << vertex << "\n";
-    SaveState();
     if (vertex) {
         edges_[parent[vertex]].status = Status::OnTheNetwork;
         updated_edge_ = parent[vertex];
@@ -188,6 +189,7 @@ void MaxFlow::ProcessPath(const std::vector<size_t>& path) {
         flow_observable_.Notify();
     }
     pushed_flow_ += (1 << flow_rate_);
+    network_observable_.Notify();
 }
 
 MaxFlow::Edge &MaxFlow::GetEdge(size_t index) {
@@ -210,7 +212,7 @@ void MaxFlow::ResetState() {
     for (auto &vertex_status : vertices_) {
         vertex_status = Status::Basic;
     }
-    flow_rate_ = 1;
+    flow_rate_ = 0;
     for (auto &edge : edges_) {
         edge.status = Status::Basic;
         while ((1 << flow_rate_) < edge.delta) {
@@ -218,6 +220,11 @@ void MaxFlow::ResetState() {
         }
     }
     updated_edge_ = std::string::npos;
+    network_observable_.Notify();
+}
+
+void MaxFlow::ResetFlowInfo() {
+    pushed_flow_ = 0;
     network_observable_.Notify();
 }
 
@@ -231,12 +238,10 @@ void MaxFlow::AddEdges(const std::vector<BasicEdge> &edges) {
     }
 }
 
-size_t MaxFlow::GetCurrentFlow() const {
-    return pushed_flow_;
-}
-
 MaxFlow::Data MaxFlow::GetData() const {
-    return {.edges = edges_, .vertices = vertices_, .update_edge = updated_edge_};
+    return {.edges = edges_, .vertices = vertices_,
+            .update_edge = updated_edge_, .flow_rate = flow_rate_,
+        .pushed_flow = pushed_flow_};
 }
 
 void MaxFlow::RegisterNetworkObserver(observer_pattern::Observer<Data>* observer) {
@@ -267,6 +272,7 @@ void MaxFlow::ChangeVerticesNumberRequest(size_t new_number) {
     graph_ = std::move(new_graph);
     edges_ = std::move(new_edges);
     ResetState();
+    ResetFlowInfo();
 }
 
 size_t MaxFlow::GenRandNum(size_t l, size_t r) {
@@ -312,6 +318,7 @@ void MaxFlow::GenRandomSampleRequest() {
     //              .delta = GenRandNum(1, kMaxEdgeCapacity)});
     // }
     ResetState();
+    ResetFlowInfo();
 }
 
 void MaxFlow::SetEdgeStatus(size_t index, Status status) {
@@ -329,7 +336,7 @@ void MaxFlow::SetPathToBasicStatus(const std::vector<size_t>& path) {
     flow_observable_.Notify();
 }
 
-void MaxFlow::SetGraphToBasicStatus() {
+void MaxFlow::SetGraphToBasicStatus(bool is_flow_notification) {
     for (Status& status : vertices_) {
         status = Status::Basic;
     }
@@ -337,7 +344,11 @@ void MaxFlow::SetGraphToBasicStatus() {
         edge.status = Status::Basic;
     }
     updated_edge_ = std::string::npos;
-    flow_observable_.Notify();
+    if (is_flow_notification) {
+        flow_observable_.Notify();
+        return;
+    }
+    network_observable_.Notify();
 }
 
 void MaxFlow::SaveState() {

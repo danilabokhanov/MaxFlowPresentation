@@ -23,14 +23,15 @@ struct MaxFlowData {
     std::vector<Edge> edges;
     std::vector<Status> vertices;
     size_t update_edge = std::string::npos;
+    size_t flow_rate = 0, pushed_flow = 0;
 };
 
 struct GeomModelData {
     std::vector<Edge> edges;
     std::vector<Status> vertices;
     size_t edge_id = std::string::npos;
-    size_t frame_id;
-    size_t frames_number;
+    size_t frame_id, frames_number;
+    size_t flow_rate, pushed_flow;
 };
 
 struct CommandData {

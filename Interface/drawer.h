@@ -6,6 +6,7 @@
 #include <QwtPlotCurve>
 #include <QwtPlotMarker>
 #include <QwtText>
+#include <QwtPlotTextLabel>
 #include "qwt_plot.h"
 #include "drawer_setup.h"
 
@@ -40,17 +41,19 @@ private:
     std::list<Vertex> vertices_;
     std::list<CurveEdge> edges_;
     std::list<Number> numbers_;
+    std::unique_ptr<QwtPlotMarker> flow_info_;
 
     void AddStaticEdge(const QPointF& begin, const QPointF& end, const Edge& edge);
     void AddDynamicEdge(const QPointF& begin, const QPointF& end,
                         const Edge& edge, size_t frame_id, size_t frames_number);
     void AddVertex(const QPointF& pos, Status status);
-    void AddNumber(const QPointF& pos, const QFont& font, const QColor& color, size_t num);
+    void AddNumber(const QPointF& pos, const QColor& color, size_t num);
     void AddStaticEdgeWithCapacity(const QPointF& begin, const QPointF& end,
                              const Edge& edge);
     void AddDynamicEdgeWithCapacity(const QPointF& begin, const QPointF& end,
                                    const Edge& edge, size_t frame_id, size_t frames_number);
     void AddVertexWithId(const QPointF& pos, size_t num, Status status);
+    void AddFlowInfo(size_t flow_rate, size_t pushed_flow, const QColor& color);
 
     QPointF CalcEdgeNumberPos(const QPointF& begin, const QPointF& end);
     QPointF CalcBendPos(const QPointF& begin, const QPointF& end, double rate);

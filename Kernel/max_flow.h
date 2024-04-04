@@ -26,8 +26,6 @@ public:
     void GenRandomSampleRequest();
     void RecoverPrevStateRequest();
 
-    size_t GetCurrentFlow() const;
-
     void RegisterNetworkObserver(observer_pattern::Observer<Data>* observer);
     void RegisterFlowObserver(observer_pattern::Observer<Data>* observer);
     void RegisterCleanupObserver(observer_pattern::Observer<void>* observer);
@@ -40,7 +38,7 @@ private:
 
     bool FindNetwork();
     void SetPathToBasicStatus(const std::vector<size_t>& path);
-    void SetGraphToBasicStatus();
+    void SetGraphToBasicStatus(bool is_flow_notification);
     void ExtendNetwork(size_t vertex, std::vector<bool>& used,
                        std::vector<ssize_t>& parent, std::deque<size_t>& queue);
     void ChangeNewEdgeStatus(size_t vertex, const std::vector<ssize_t>& parent);
@@ -60,6 +58,7 @@ private:
     void SetEdgeStatus(size_t index, Status status);
 
     void ResetState();
+    void ResetFlowInfo();
     void SaveState();
 
     size_t GenRandNum(size_t l, size_t r);

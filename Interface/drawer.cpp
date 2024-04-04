@@ -14,8 +14,10 @@ Drawer::Drawer(QFrame* frame): layout_(new QVBoxLayout(frame)), plot_(new QwtPlo
 }
 
 void Drawer::DrawGraph(const Data& data) {
-    const auto& [edges, vertices, edge_id, frame_id, frames_number] = data;
+    const auto& [edges, vertices, edge_id, frame_id,
+                 frames_number, flow_rate, pushed_flow] = data;
     ResetState();
+    AddFlowInfo(flow_rate, pushed_flow, DrawerSetup::kBasicColor.begin() -> second);
     for (size_t i = 0; i < edges.size(); i++) {
         QPointF begin(GetVertexPosById(vertices.size(), edges[i].u));
         QPointF end(GetVertexPosById(vertices.size(), edges[i].to));
@@ -39,7 +41,7 @@ void Drawer::AddStaticEdgeWithCapacity(const QPointF& begin, const QPointF& end,
     QPointF shift_tail = SetVectorLength(bend - begin, DrawerSetup::kCenterPadding);
     AddStaticEdge(begin + shift_tail, end - shift_head, edge);
     AddNumber(CalcEdgeNumberPos(begin + shift_tail, end - shift_head),
-              DrawerSetup::kGraphFont, GetEdgeNumberColor(edge), edge.delta);
+              GetEdgeNumberColor(edge), edge.delta);
 }
 
 void Drawer::AddDynamicEdgeWithCapacity(const QPointF& begin, const QPointF& end,
@@ -49,12 +51,12 @@ void Drawer::AddDynamicEdgeWithCapacity(const QPointF& begin, const QPointF& end
     QPointF shift_tail = SetVectorLength(bend - begin, DrawerSetup::kCenterPadding);
     AddDynamicEdge(begin + shift_tail, end - shift_head, edge, frame_id, frames_number);
     AddNumber(CalcEdgeNumberPos(begin + shift_tail, end - shift_head),
-              DrawerSetup::kGraphFont, GetEdgeNumberColor(edge), edge.delta);
+              GetEdgeNumberColor(edge), edge.delta);
 }
 
 void Drawer::AddVertexWithId(const QPointF& pos, size_t num, Status status) {
     AddVertex(pos, status);
-    AddNumber(pos, DrawerSetup::kGraphFont, GetVertexNumberColor(status), num);
+    AddNumber(pos, GetVertexNumberColor(status), num);
 }
 
 void Drawer::AddStaticEdge(const QPointF& begin, const QPointF& end, const Edge& data) {
@@ -93,15 +95,19 @@ void Drawer::ResetState() {
     for (auto& vertex: vertices_) {
         vertex.base -> detach();
     }
+    if (flow_info_) {
+        flow_info_ -> detach();
+    }
     edges_.clear();
     numbers_.clear();
     vertices_.clear();
+    flow_info_.reset(nullptr);
 }
 
-void Drawer::AddNumber(const QPointF& pos, const QFont& font, const QColor& color, size_t num) {
+void Drawer::AddNumber(const QPointF& pos, const QColor& color, size_t num) {
     Number number;
     QwtText text(std::to_string(num).data());
-    text.setFont(font);
+    text.setFont(DrawerSetup::kGraphFont);
     text.setColor(color);
     number.base.reset(new QwtPlotMarker());
     number.base -> setLabel(text);
@@ -123,6 +129,19 @@ void Drawer::AddVertex(const QPointF& pos, Status status) {
     vertex.base -> setSymbol(circle);
     vertex.base -> attach(plot_.get());
     vertices_.push_back(std::move(vertex));
+}
+
+void Drawer::AddFlowInfo(size_t flow_rate, size_t pushed_flow, const QColor& color) {
+    QwtText text(("boundary:" + std::to_string(1u << flow_rate) +
+                  "\nflow pushed out:"
+                  + std::to_string(pushed_flow)).data());
+    text.setFont(DrawerSetup::kFlowRateFont);
+    text.setColor(color);
+    text.setRenderFlags(Qt::AlignLeft | Qt::AlignTop);
+    flow_info_.reset(new QwtPlotMarker());
+    flow_info_ -> setLabel(text);
+    flow_info_ -> setValue(DrawerSetup::kFlowInfoPos);
+    flow_info_ -> attach(plot_.get());
 }
 
 QPointF Drawer::CalcEdgeNumberPos(const QPointF& begin, const QPointF& end) {
