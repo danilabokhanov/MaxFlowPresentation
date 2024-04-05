@@ -44,10 +44,17 @@ size_t MaxFlow::FindEdge(const MaxFlow::BasicEdge& edge) {
 }
 
 void MaxFlow::AddEdgeRequest(const MaxFlow::BasicEdge &edge) {
+    if (!isValid(edge)) {
+        return;
+    }
     SaveState();
     AddEdge(edge);
     ResetState();
     ResetFlowInfo();
+}
+
+bool MaxFlow::isValid(const BasicEdge& edge) {
+    return edge.u < n_ && edge.to < n_ && edge.u != edge.to && edge.delta;
 }
 
 void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge &edge) {

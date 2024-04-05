@@ -108,6 +108,7 @@ void View::SkipButtonPressed() {
 }
 
 void View::UpdateGraphView(const ReceivingData& data) {
+    main_window_.GetVerticesSpinBoxPtr()->setValue(data.vertices.size());
     drawer_.DrawGraph(data);
 }
 

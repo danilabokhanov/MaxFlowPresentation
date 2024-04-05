@@ -7,8 +7,8 @@ MainWindow::MainWindow(QWidget *parent)
       , ui_(std::make_unique<Ui::MainWindow>())
 {
     ui_->setupUi(this);
+    setWindowTitle("MaxFlow");
 }
-
 
 MainWindow::~MainWindow() = default;
 

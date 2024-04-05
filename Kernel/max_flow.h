@@ -56,6 +56,7 @@ private:
     void AddEdge(const BasicEdge& edge);
     size_t FindEdge(const MaxFlow::BasicEdge& edge);
     void SetEdgeStatus(size_t index, Status status);
+    bool isValid(const BasicEdge& edge);
 
     void ResetState();
     void ResetFlowInfo();

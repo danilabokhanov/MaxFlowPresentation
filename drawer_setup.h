@@ -11,7 +11,7 @@ struct DrawerSetup {
     inline static const double kCurveRate = 0.5, kEdgeHeadSide = 0.35, kVertexRadius = 30,
         kCenterPadding = 0.3, kMaxX = 10, kMaxY = 10, kSinkPadingRate = 0.05, kEdgeWidth = 4;
 
-    inline static const QFont kGraphFont = QFont("Arial", 16, QFont::Bold);
+    inline static const QFont kGraphFont = QFont("Arial", 17, QFont::Bold);
     inline static const QFont kFlowRateFont = QFont("Arial", 20, QFont::Bold);
     inline static const QFont kPushFlowFont = kFlowRateFont;
     inline static const QPointF kFlowInfoPos = QPointF(kMaxX * 0.87, kMaxY * 0.96);
