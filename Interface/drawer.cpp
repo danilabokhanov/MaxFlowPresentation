@@ -2,15 +2,13 @@
 #include <math.h>
 #include <QwtWeedingCurveFitter>
 #include <QEventLoop>
-#include <iostream>
 
 namespace max_flow_app {
 Drawer::Drawer(QFrame* frame): layout_(new QVBoxLayout(frame)), plot_(new QwtPlot(frame)) {
-    // plot_ -> setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     layout_ -> addWidget(plot_.get());
     frame -> setLayout(layout_.get());
-    plot_ -> setAxisScale(QwtPlot::xBottom, 0, DrawerSetup::kMaxX);
-    plot_ -> setAxisScale(QwtPlot::yLeft, 0, DrawerSetup::kMaxY);
+    plot_->setAxisVisible(QwtAxis::YLeft, false);
+    plot_->setAxisVisible(QwtAxis::XBottom, false);
 }
 
 void Drawer::DrawGraph(const Data& data) {
