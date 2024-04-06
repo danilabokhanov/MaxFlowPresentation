@@ -29,6 +29,7 @@ public:
     void RegisterNetworkObserver(observer_pattern::Observer<Data>* observer);
     void RegisterFlowObserver(observer_pattern::Observer<Data>* observer);
     void RegisterCleanupObserver(observer_pattern::Observer<void>* observer);
+    void RegisterUnlockObserver(observer_pattern::Observer<void>* observer);
 
     Data GetData() const;
 
@@ -79,6 +80,7 @@ private:
     observer_pattern::Observable<Data> flow_observable_ =
         observer_pattern::Observable<Data> ([this] () {return GetData();});
     observer_pattern::Observable<void> сleanup_observable_;
+    observer_pattern::Observable<void> unlock_observable_;
 
     std::mt19937 rand_generator_;
 

@@ -32,7 +32,7 @@ void Controller::CallCancel() {
 }
 
 void Controller::CallSkip() {
-    geom_model_ptr_ -> SkipFrames();
+    geom_model_ptr_ -> SkipFramesRequest();
 }
 
 Controller::ViewObserver* Controller::GetSubscriberPtr() {

@@ -18,6 +18,7 @@ void MaxFlow::RunRequest() {
         while (!FindNetwork()) {
             if (flow_rate_ == 0) {
                 SetGraphToBasicStatus(false);
+                unlock_observable_.Notify();
                 return;
             }
             SetGraphToBasicStatus(true);
@@ -263,6 +264,10 @@ void MaxFlow::RegisterCleanupObserver(observer_pattern::Observer<void>* observer
     сleanup_observable_.Subscribe(observer);
 }
 
+void MaxFlow::RegisterUnlockObserver(observer_pattern::Observer<void>* observer) {
+    unlock_observable_.Subscribe(observer);
+}
+
 void MaxFlow::ChangeVerticesNumberRequest(size_t new_number) {
     SaveState();
     vertices_.resize(new_number, Status::Basic);
@@ -300,7 +305,6 @@ void MaxFlow::AddEdge(const BasicEdge& edge) {
         return;
     }
     edges_[index].delta += edge.delta;
-    return;
 }
 
 void MaxFlow::GenRandomSampleRequest() {
@@ -390,5 +394,6 @@ void MaxFlow::RecoverPrevStateRequest() {
     }
     network_observable_.Notify();
     сleanup_observable_.Notify();
+    unlock_observable_.Notify();
 }
 }

@@ -15,6 +15,7 @@ public:
     using NetworkObserver = observer_pattern::Observer<MaxFlowData>;
     using FlowObserver = observer_pattern::Observer<MaxFlowData>;
     using ClearSignalObserver = observer_pattern::Observer<void>;
+    using UnlockObserver = observer_pattern::Observer<void>;
     using StateObservable = observer_pattern::Observable<GeomModelData>;
     using StateObserver = observer_pattern::Observer<GeomModelData>;
 
@@ -22,8 +23,11 @@ public:
     void RegisterView(StateObserver* observer);
     NetworkObserver* GetNetworkObserverPtr();
     FlowObserver* GetFlowObserverPtr();
-    ClearSignalObserver* GetClearSignalObserver();
+    ClearSignalObserver* GetClearSignalObserverPtr();
+    UnlockObserver* GetUnlockObserverPtr();
+
     void SkipFrames();
+    void SkipFramesRequest();
     static size_t GetFPSRate();
 
 private slots:
@@ -42,6 +46,10 @@ private:
         [](const MaxFlowData&) {},
         [this](const MaxFlowData& data) {AddDynamicState(data);},
         [](const MaxFlowData&) {});
+    UnlockObserver unlock_observer_ = ClearSignalObserver(
+        []() {},
+        [this]() {AddUnlockNotification();},
+        []() {});
     ClearSignalObserver clear_signal_observer_ = ClearSignalObserver(
         []() {},
         [this]() {SkipFrames();},
@@ -57,6 +65,7 @@ private:
 
     void AddDynamicState(const MaxFlowData& data);
     void AddStaticState(const MaxFlowData& data);
+    void AddUnlockNotification();
     void StartTimer();
 };
 }

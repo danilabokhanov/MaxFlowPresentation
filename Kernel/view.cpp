@@ -33,17 +33,14 @@ View::GeomModelObserver* View::GetSubscriberPtr() {
 }
 
 void View::ApplyButtonPressed() {
-    LockInterface();
     std::cout << "apply\n";
     auto* spin_box = main_window_.GetVerticesSpinBoxPtr();
     message_.signal_type = SendingData::CHANGE_VERTICES_NUMBER;
     message_.args = static_cast<size_t>(spin_box -> value());
     command_observable_.Notify();
-    UnlockInterface();
 }
 
 void View::AddButtonPressed() {
-    LockInterface();
     std::cout << "add\n";
     auto* spin_box_u = main_window_.GetUSpinBoxPtr();
     auto* spin_box_v = main_window_.GetVSpinBoxPtr();
@@ -54,11 +51,9 @@ void View::AddButtonPressed() {
                                        .to = static_cast<size_t>(spin_box_v -> value()),
                                        .delta = static_cast<size_t>(spin_box_weight -> value())};
     command_observable_.Notify();
-    UnlockInterface();
 }
 
 void View::DeleteButtonPressed() {
-    LockInterface();
     std::cout << "delete\n";
     auto* spin_box_u = main_window_.GetUSpinBoxPtr();
     auto* spin_box_v = main_window_.GetVSpinBoxPtr();
@@ -67,7 +62,6 @@ void View::DeleteButtonPressed() {
     message_.args = BasicEdge{.u = static_cast<size_t>(spin_box_u -> value()),
                                        .to = static_cast<size_t>(spin_box_v -> value())};
     command_observable_.Notify();
-    UnlockInterface();
 }
 
 void View::RunButtonPressed() {
@@ -76,38 +70,35 @@ void View::RunButtonPressed() {
     message_.signal_type = SendingData::RUN;
     message_.args = SendingData::Empty{};
     command_observable_.Notify();
-    UnlockInterface();
 }
 
 void View::GenRandomSampleButtonPressed() {
-    LockInterface();
     std::cout << "random sample\n";
     message_.signal_type = SendingData::GEN_RANDOM_SAMPLE;
     message_.args = SendingData::Empty{};
     command_observable_.Notify();
-    UnlockInterface();
 }
 
 void View::CancelButtonPressed() {
-    LockInterface();
     std::cout << "cancel\n";
     message_.signal_type = SendingData::CANCEL;
     message_.args = SendingData::Empty{};
     command_observable_.Notify();
-    UnlockInterface();
 }
 
 
 void View::SkipButtonPressed() {
-    LockInterface();
     std::cout << "skip\n";
     message_.signal_type = SendingData::SKIP;
     message_.args = SendingData::Empty{};
     command_observable_.Notify();
-    UnlockInterface();
 }
 
 void View::UpdateGraphView(const ReceivingData& data) {
+    if (data.is_unlock) {
+        UnlockInterface();
+        return;
+    }
     main_window_.GetVerticesSpinBoxPtr()->setValue(data.vertices.size());
     drawer_.DrawGraph(data);
 }
@@ -122,21 +113,17 @@ void View::RegisterController(CommandObserver* observer) {
 
 void View::LockInterface() {
     main_window_.GetAddButtonPtr() -> setEnabled(false);
-    main_window_.GetCancelButtonPtr() -> setEnabled(false);
     main_window_.GetDeleteButtonPtr() -> setEnabled(false);
     main_window_.GetRandomSampleButtonPtr() -> setEnabled(false);
     main_window_.GetRunButtonPtr() -> setEnabled(false);
-    main_window_.GetSkipButtonPtr() -> setEnabled(false);
     main_window_.GetVerticesButtonPtr() -> setEnabled(false);
 }
 
 void View::UnlockInterface() {
     main_window_.GetAddButtonPtr() -> setEnabled(true);
-    main_window_.GetCancelButtonPtr() -> setEnabled(true);
     main_window_.GetDeleteButtonPtr() -> setEnabled(true);
     main_window_.GetRandomSampleButtonPtr() -> setEnabled(true);
     main_window_.GetRunButtonPtr() -> setEnabled(true);
-    main_window_.GetSkipButtonPtr() -> setEnabled(true);
     main_window_.GetVerticesButtonPtr() -> setEnabled(true);
 }
 }

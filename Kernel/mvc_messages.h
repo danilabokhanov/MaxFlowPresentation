@@ -32,6 +32,7 @@ struct GeomModelData {
     size_t edge_id = std::string::npos;
     size_t frame_id, frames_number;
     size_t flow_rate, pushed_flow;
+    bool is_unlock = false;
 };
 
 struct CommandData {

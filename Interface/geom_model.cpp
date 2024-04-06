@@ -17,8 +17,12 @@ GeomModel::FlowObserver* GeomModel::GetFlowObserverPtr() {
     return &flow_observer_;
 }
 
-GeomModel::ClearSignalObserver* GeomModel::GetClearSignalObserver() {
+GeomModel::ClearSignalObserver* GeomModel::GetClearSignalObserverPtr() {
     return &clear_signal_observer_;
+}
+
+GeomModel::UnlockObserver* GeomModel::GetUnlockObserverPtr() {
+    return &unlock_observer_;
 }
 
 void GeomModel::ProcessNextState() {
@@ -43,6 +47,10 @@ void GeomModel::AddStaticState(const MaxFlowData& data) {
                                     .pushed_flow = data.pushed_flow});
 }
 
+void GeomModel::AddUnlockNotification() {
+    states_.push_back(GeomModelData{.is_unlock = true});
+}
+
 void GeomModel::StartTimer() {
     connect(timer_.get(), &QTimer::timeout, this, &GeomModel::ProcessNextState);
     timer_ -> setInterval(kTimerInterval);
@@ -54,8 +62,14 @@ size_t GeomModel::GetFPSRate() {
 }
 
 void GeomModel::SkipFrames() {
-    while (states_.size() > 1u) {
+    while (states_.size() > 2u || (states_.size() == 2u &&
+                                   !states_.back().is_unlock)) {
         states_.pop_front();
     }
+}
+
+void GeomModel::SkipFramesRequest() {
+    SkipFrames();
+    AddUnlockNotification();
 }
 }
