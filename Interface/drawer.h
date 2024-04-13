@@ -8,20 +8,20 @@
 #include <QwtText>
 #include <QwtPlotTextLabel>
 #include "qwt_plot.h"
-#include "drawer_setup.h"
+#include "Kernel/kernel_messages.h"
+#include "interface_messages.h"
 
 namespace max_flow_app {
 class Drawer {
 public:
-    using Edge = mvc_messages::Edge;
-    using Data = mvc_messages::GeomModelData;
-    using Status = mvc_messages::Status;
+    using Edge = kernel_messages::Edge;
+    using Status = kernel_messages::Status;
+    using Data = interface_messages::GeomModelData;
 
     Drawer(QFrame* frame);
     void DrawGraph(const Data& data);
+    QwtPlot* GetQwtPlotPtr();
 private:
-    inline static const DrawerSetup pattle;
-
     std::unique_ptr<QVBoxLayout> layout_;
     std::unique_ptr<QwtPlot> plot_;
 
@@ -46,21 +46,18 @@ private:
     void AddStaticEdge(const QPointF& begin, const QPointF& end, const Edge& edge);
     void AddDynamicEdge(const QPointF& begin, const QPointF& end,
                         const Edge& edge, size_t frame_id, size_t frames_number);
-    void AddVertex(const QPointF& pos, Status status);
+    void AddVertex(const QPointF& pos, Status status, bool is_selected);
     void AddNumber(const QPointF& pos, const QColor& color, size_t num);
     void AddStaticEdgeWithCapacity(const QPointF& begin, const QPointF& end,
                              const Edge& edge);
     void AddDynamicEdgeWithCapacity(const QPointF& begin, const QPointF& end,
                                    const Edge& edge, size_t frame_id, size_t frames_number);
-    void AddVertexWithId(const QPointF& pos, size_t num, Status status);
+    void AddVertexWithId(const QPointF& pos, size_t num, Status status, bool is_selected);
     void AddFlowInfo(size_t flow_rate, size_t pushed_flow, const QColor& color);
 
     QPointF CalcEdgeNumberPos(const QPointF& begin, const QPointF& end);
     QPointF CalcBendPos(const QPointF& begin, const QPointF& end, double rate);
     QPointF CalcEdgeBendPos(const QPointF& begin, const QPointF& end);
-    QPointF RotateVector(const QPointF& begin, const QPointF& end,  double angle, double len);
-    QPointF SetVectorLength(QPointF vec, double len);
-    QPointF GetVertexPosById(size_t number, size_t index);
     QColor GetEdgeColor(Status status) const;
     QColor GetVertexColor(Status status) const;
     QColor GetBorderColor(Status status) const;

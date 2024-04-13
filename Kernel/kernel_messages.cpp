@@ -1,7 +1,7 @@
-#include "mvc_messages.h"
+#include "kernel_messages.h"
 
 namespace max_flow_app {
-namespace mvc_messages {
+namespace kernel_messages {
 Status GetPreviousStatus(Status status) {
     switch (status) {
         case Status::OnTheNetwork:

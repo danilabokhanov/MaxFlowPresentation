@@ -1,16 +1,27 @@
 #include "view.h"
-#include <iostream>
 #include <QAction>
 #include <QPushButton>
+#include <qwt_picker_machine.h>
 
 namespace max_flow_app {
 View::View():
       main_window_(),
       drawer_(main_window_.GetQwtFramePtr()),
-      geom_model_observer_([this](const ReceivingData& data) {UpdateGraphView(data);},
-                               [this](const ReceivingData& data) {UpdateGraphView(data);},
-                               [](const ReceivingData&) {}),
-      command_observable_([this]() {return ProduceViewMessage();}) {
+      geom_model_observer_([this](const FrameQueueData& data) {UpdateGraphView(data);},
+                               [this](const FrameQueueData& data) {UpdateGraphView(data);},
+                               [](const FrameQueueData&) {}),
+    command_observable_([this]() {return ProduceViewMessage();}),
+    picker_(new QwtPlotPicker(drawer_.GetQwtPlotPtr() -> canvas())) {
+    SetupButtons();
+    SetupPicker();
+    main_window_.show();
+}
+
+View::FrameQueueObserver* View::GetSubscriberPtr() {
+    return &geom_model_observer_;
+}
+
+void View::SetupButtons() {
     connect(main_window_.GetVerticesButtonPtr(), &QPushButton::clicked, this,
             &View::ApplyButtonPressed);
     connect(main_window_.GetAddButtonPtr(), &QPushButton::clicked, this,
@@ -25,28 +36,30 @@ View::View():
             &View::SkipButtonPressed);
     connect(main_window_.GetCancelButtonPtr(), &QPushButton::clicked, this,
             &View::CancelButtonPressed);
-    main_window_.show();
 }
 
-View::GeomModelObserver* View::GetSubscriberPtr() {
-    return &geom_model_observer_;
+void View::SetupPicker() {
+    picker_ -> setStateMachine(new QwtPickerDragPointMachine);
+    connect(picker_, &QwtPlotPicker::appended, this,
+            &View::MousePressed);
+    connect(picker_, &QwtPlotPicker::moved, this, &View::MouseMoved);
+    connect(picker_, qOverload<const QPointF&>(&QwtPlotPicker::selected),
+            this, &View::MouseReleased);
 }
 
 void View::ApplyButtonPressed() {
-    std::cout << "apply\n";
     auto* spin_box = main_window_.GetVerticesSpinBoxPtr();
-    message_.signal_type = SendingData::CHANGE_VERTICES_NUMBER;
+    message_.signal_type = CommandData::SignalType::CHANGE_VERTICES_NUMBER;
     message_.args = static_cast<size_t>(spin_box -> value());
     command_observable_.Notify();
 }
 
 void View::AddButtonPressed() {
-    std::cout << "add\n";
     auto* spin_box_u = main_window_.GetUSpinBoxPtr();
     auto* spin_box_v = main_window_.GetVSpinBoxPtr();
     auto* spin_box_weight = main_window_.GetWeightSpinBoxPtr();
 
-    message_.signal_type = SendingData::ADD_EDGE;
+    message_.signal_type = CommandData::SignalType::ADD_EDGE;
     message_.args = BasicEdge{.u = static_cast<size_t>(spin_box_u -> value()),
                                        .to = static_cast<size_t>(spin_box_v -> value()),
                                        .delta = static_cast<size_t>(spin_box_weight -> value())};
@@ -54,11 +67,10 @@ void View::AddButtonPressed() {
 }
 
 void View::DeleteButtonPressed() {
-    std::cout << "delete\n";
     auto* spin_box_u = main_window_.GetUSpinBoxPtr();
     auto* spin_box_v = main_window_.GetVSpinBoxPtr();
 
-    message_.signal_type = SendingData::DELETE_EDGE;
+    message_.signal_type = CommandData::SignalType::DELETE_EDGE;
     message_.args = BasicEdge{.u = static_cast<size_t>(spin_box_u -> value()),
                                        .to = static_cast<size_t>(spin_box_v -> value())};
     command_observable_.Notify();
@@ -66,44 +78,58 @@ void View::DeleteButtonPressed() {
 
 void View::RunButtonPressed() {
     LockInterface();
-    std::cout << "go next\n";
-    message_.signal_type = SendingData::RUN;
-    message_.args = SendingData::Empty{};
+    message_.signal_type = CommandData::SignalType::RUN;
+    message_.args = std::monostate{};
     command_observable_.Notify();
 }
 
 void View::GenRandomSampleButtonPressed() {
-    std::cout << "random sample\n";
-    message_.signal_type = SendingData::GEN_RANDOM_SAMPLE;
-    message_.args = SendingData::Empty{};
+    message_.signal_type = CommandData::SignalType::GEN_RANDOM_SAMPLE;
+    message_.args = std::monostate{};
     command_observable_.Notify();
 }
 
 void View::CancelButtonPressed() {
-    std::cout << "cancel\n";
-    message_.signal_type = SendingData::CANCEL;
-    message_.args = SendingData::Empty{};
+    message_.signal_type = CommandData::SignalType::CANCEL;
+    message_.args = std::monostate{};
     command_observable_.Notify();
 }
 
 
 void View::SkipButtonPressed() {
-    std::cout << "skip\n";
-    message_.signal_type = SendingData::SKIP;
-    message_.args = SendingData::Empty{};
+    message_.signal_type = CommandData::SignalType::SKIP;
+    message_.args = std::monostate{};
     command_observable_.Notify();
 }
 
-void View::UpdateGraphView(const ReceivingData& data) {
+void View::MousePressed(const QPointF& pos) {
+    message_.signal_type = CommandData::SignalType::MOUSE_PRESSED;
+    message_.args = MousePosition{.x = pos.x(), .y = pos.y()};
+    command_observable_.Notify();
+}
+
+void View::MouseMoved(const QPointF& pos) {
+    message_.signal_type = CommandData::SignalType::MOUSE_MOVED;
+    message_.args = MousePosition{.x = pos.x(), .y = pos.y()};
+    command_observable_.Notify();
+}
+
+void View::MouseReleased(const QPointF& pos) {
+    message_.signal_type = CommandData::SignalType::MOUSE_RELEASED;
+    message_.args = MousePosition{.x = pos.x(), .y = pos.y()};
+    command_observable_.Notify();
+}
+
+void View::UpdateGraphView(const FrameQueueData& data) {
     if (data.is_unlock) {
         UnlockInterface();
         return;
     }
-    main_window_.GetVerticesSpinBoxPtr()->setValue(data.vertices.size());
-    drawer_.DrawGraph(data);
+    main_window_.GetVerticesSpinBoxPtr()->setValue(data.geom_model.vertices.size());
+    drawer_.DrawGraph(data.geom_model);
 }
 
-View::SendingData View::ProduceViewMessage() const {
+View::CommandData View::ProduceViewMessage() const {
     return message_;
 }
 

@@ -1,7 +1,7 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "Kernel/view.h"
+#include "Interface/view.h"
 #include "Interface/geom_model.h"
 #include "Kernel/controller.h"
 

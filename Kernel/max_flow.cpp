@@ -1,7 +1,6 @@
 #include "max_flow.h"
 #include <deque>
 #include <sys/types.h>
-#include <iostream>
 #include <chrono>
 #include <string>
 
@@ -113,7 +112,6 @@ void MaxFlow::ExtendNetwork(size_t vertex, std::vector<bool>& used,
 }
 
 void MaxFlow::ChangeNewEdgeStatus(size_t vertex, const std::vector<ssize_t>& parent) {
-    std::cout << "vertex: " << vertex << "\n";
     if (vertex) {
         edges_[parent[vertex]].status = Status::OnTheNetwork;
         updated_edge_ = parent[vertex];
@@ -160,7 +158,6 @@ bool MaxFlow::FindNetwork() {
 
 bool MaxFlow::FindPath(size_t vertex, std::vector<size_t>& path) {
     if (vertex == n_ - 1) {
-        std::cout << "vertex: " << n_ - 1 << "\n";
         return true;
     }
     while (processed_neighbors_[vertex] < graph_[vertex].size()) {
@@ -181,7 +178,6 @@ bool MaxFlow::FindPath(size_t vertex, std::vector<size_t>& path) {
 }
 
 void MaxFlow::ProcessPath(const std::vector<size_t>& path) {
-    std::cout << "start proccessing path\n";
     vertices_[0] = Status::OnThePath;
     updated_edge_ = std::string::npos;
     flow_observable_.Notify();
@@ -318,16 +314,6 @@ void MaxFlow::GenRandomSampleRequest() {
     for (size_t i = 1; i < n_; i++) {
         AddEdge({.u = GenRandNum(0, i - 1), .to = i, .delta = GenRandNum(1, kMaxEdgeCapacity)});
     }
-    // for (size_t i = n_ - 2;; i--) {
-    //     AddEdge({.u = GenRandNum(i + 1, n_ - 1), .to = i, .delta = GenRandNum(1, kMaxEdgeCapacity)});
-    //     if (!i) {
-    //         break;
-    //     }
-    // }
-    // for (size_t i = 0; i < n_; i++) {
-    //     AddEdge({.u = GenRandNum(0, n_ - 1), .to = GenRandNum(0, n_ - 1),
-    //              .delta = GenRandNum(1, kMaxEdgeCapacity)});
-    // }
     ResetState();
     ResetFlowInfo();
 }

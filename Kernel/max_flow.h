@@ -4,17 +4,16 @@
 #include <cstddef>
 #include <deque>
 #include "Library/observer_pattern.h"
-#include "mvc_messages.h"
+#include "kernel_messages.h"
 #include <random>
-#include <string>
 
 namespace max_flow_app {
 class MaxFlow {
 public:
-    using BasicEdge = mvc_messages::BasicEdge;
-    using Edge = mvc_messages::Edge;
-    using Data = mvc_messages::MaxFlowData;
-    using Status = mvc_messages::Status;
+    using BasicEdge = kernel_messages::BasicEdge;
+    using Edge = kernel_messages::Edge;
+    using Data = kernel_messages::MaxFlowData;
+    using Status = kernel_messages::Status;
 
     MaxFlow() = default;
     MaxFlow(size_t n, size_t m, const std::vector<BasicEdge>& edges);

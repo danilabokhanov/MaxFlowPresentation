@@ -35,33 +35,56 @@ void Controller::CallSkip() {
     geom_model_ptr_ -> SkipFramesRequest();
 }
 
+void Controller::CallMousePressedHandler(const MousePosition& pos) {
+    geom_model_ptr_ -> HandleMousePressedAction(pos);
+}
+
+void Controller::CallMouseMovedHandler(const MousePosition& pos) {
+    geom_model_ptr_ -> HandleMouseMovedAction(pos);
+}
+
+void Controller::CallMouseReleasedHandler(const MousePosition& pos) {
+    geom_model_ptr_ -> HandleMouseReleasedAction(pos);
+}
+
 Controller::ViewObserver* Controller::GetSubscriberPtr() {
     return &view_observer_;
 }
 
 void Controller::HandleData(const CommandData& data) {
     switch (data.signal_type) {
-        case CommandData::CHANGE_VERTICES_NUMBER:
+    case CommandData::SignalType::CHANGE_VERTICES_NUMBER:
             CallChangeVerticesNumber(std::get<size_t> (data.args));
             break;
-        case CommandData::ADD_EDGE:
-            CallAddEdge(std::get<MaxFlow::BasicEdge> (data.args));
+        case CommandData::SignalType::ADD_EDGE:
+            CallAddEdge(std::get<BasicEdge> (data.args));
             break;
-        case CommandData::DELETE_EDGE:
-            CallDeleteEdge(std::get<MaxFlow::BasicEdge> (data.args));
+        case CommandData::SignalType::DELETE_EDGE:
+            CallDeleteEdge(std::get<BasicEdge> (data.args));
             break;
-        case CommandData::RUN:
+        case CommandData::SignalType::RUN:
             CallRun();
             break;
-        case CommandData::GEN_RANDOM_SAMPLE:
+        case CommandData::SignalType::GEN_RANDOM_SAMPLE:
             CallGenRandomSample();
             break;
-        case CommandData::CANCEL:
+        case CommandData::SignalType::CANCEL:
             CallCancel();
             break;
-        case CommandData::SKIP:
+        case CommandData::SignalType::SKIP:
             CallSkip();
             break;
+        case CommandData::SignalType::MOUSE_PRESSED:
+            CallMousePressedHandler(std::get<MousePosition>(data.args));
+            break;
+        case CommandData::SignalType::MOUSE_MOVED:
+            CallMouseMovedHandler(std::get<MousePosition>(data.args));
+            break;
+        case CommandData::SignalType::MOUSE_RELEASED:
+            CallMouseReleasedHandler(std::get<MousePosition>(data.args));
+            break;
+        default:
+            assert(0);
     }
 }
 

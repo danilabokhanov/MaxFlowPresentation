@@ -1,15 +1,16 @@
-#ifndef DRAWER_SETUP_H
-#define DRAWER_SETUP_H
+#ifndef DRAWER_HELPER_H
+#define DRAWER_HELPER_H
 
 #include <QFrame>
-#include "Kernel/mvc_messages.h"
+#include "Kernel/kernel_messages.h"
 
 namespace max_flow_app {
-struct DrawerSetup {
-    using Status = mvc_messages::Status;
+struct DrawerHelper {
+    using Status = kernel_messages::Status;
 
     inline static const double kCurveRate = 0.5, kEdgeHeadSide = 0.35, kVertexRadius = 30,
-        kCenterPadding = 0.3, kMaxX = 10, kMaxY = 10, kSinkPadingRate = 0.05, kEdgeWidth = 4;
+        kCenterPadding = 0.3, kMaxX = 10, kMaxY = 10, kSinkPadingRate = 0.05, kEdgeWidth = 4,
+        kDistEps = 0.05;
 
     inline static const QFont kGraphFont = QFont("Arial", 17, QFont::Bold);
     inline static const QFont kFlowRateFont = QFont("Arial", 20, QFont::Bold);
@@ -24,7 +25,11 @@ struct DrawerSetup {
     inline static const std::map<Status, QColor> kBasicColor = {{Status::Basic,  {0, 0, 0}},
                                                                 {Status::OnTheNetwork, {102, 0, 0}},
                                                                 {Status::OnThePath, {0, 0, 102}}};
+
+    static QPointF RotateVector(const QPointF& begin, const QPointF& end,  double angle, double len);
+    static double GetVectorLength(const QPointF& vec);
+    static QPointF SetVectorLength(const QPointF& vec, double len);
 };
 }
 
-#endif  // DRAWER_SETUP_H
+#endif  // DRAWER_HELPER_H

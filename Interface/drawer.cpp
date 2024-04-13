@@ -2,25 +2,26 @@
 #include <math.h>
 #include <QwtWeedingCurveFitter>
 #include <QEventLoop>
+#include "drawer_helper.h"
 
 namespace max_flow_app {
 Drawer::Drawer(QFrame* frame): layout_(new QVBoxLayout(frame)), plot_(new QwtPlot(frame)) {
     layout_ -> addWidget(plot_.get());
     frame -> setLayout(layout_.get());
-    plot_ -> setAxisScale(QwtPlot::xBottom, 0, DrawerSetup::kMaxX);
-    plot_ -> setAxisScale(QwtPlot::yLeft, 0, DrawerSetup::kMaxY);
+    plot_ -> setAxisScale(QwtPlot::xBottom, 0, DrawerHelper::kMaxX);
+    plot_ -> setAxisScale(QwtPlot::yLeft, 0, DrawerHelper::kMaxY);
     plot_->setAxisVisible(QwtAxis::YLeft, false);
     plot_->setAxisVisible(QwtAxis::XBottom, false);
 }
 
 void Drawer::DrawGraph(const Data& data) {
-    const auto& [edges, vertices, edge_id, frame_id,
-                 frames_number, flow_rate, pushed_flow, _] = data;
+    const auto& [edges, vertices, pos, edge_id, frame_id,
+                 frames_number, flow_rate, pushed_flow, selected_vertex] = data;
     ResetState();
-    AddFlowInfo(flow_rate, pushed_flow, DrawerSetup::kBasicColor.begin() -> second);
+    AddFlowInfo(flow_rate, pushed_flow, DrawerHelper::kBasicColor.begin() -> second);
     for (size_t i = 0; i < edges.size(); i++) {
-        QPointF begin(GetVertexPosById(vertices.size(), edges[i].u));
-        QPointF end(GetVertexPosById(vertices.size(), edges[i].to));
+        QPointF begin(pos[edges[i].u]);
+        QPointF end(pos[edges[i].to]);
         if (i == edge_id) {
             AddDynamicEdgeWithCapacity(begin, end, edges[i], frame_id, frames_number);
         } else {
@@ -28,7 +29,7 @@ void Drawer::DrawGraph(const Data& data) {
         }
     }
     for (size_t i = 0; i < vertices.size(); i++) {
-        AddVertexWithId(GetVertexPosById(vertices.size(), i), i, vertices[i]);
+        AddVertexWithId(pos[i], i, vertices[i], i == selected_vertex);
     }
     assert(plot_);
     plot_ -> replot();
@@ -37,8 +38,8 @@ void Drawer::DrawGraph(const Data& data) {
 void Drawer::AddStaticEdgeWithCapacity(const QPointF& begin, const QPointF& end,
                                  const Edge& edge) {
     QPointF bend = CalcEdgeBendPos(begin, end);
-    QPointF shift_head = SetVectorLength(end - bend, DrawerSetup::kCenterPadding);
-    QPointF shift_tail = SetVectorLength(bend - begin, DrawerSetup::kCenterPadding);
+    QPointF shift_head = DrawerHelper::SetVectorLength(end - bend, DrawerHelper::kCenterPadding);
+    QPointF shift_tail = DrawerHelper::SetVectorLength(bend - begin, DrawerHelper::kCenterPadding);
     AddStaticEdge(begin + shift_tail, end - shift_head, edge);
     AddNumber(CalcEdgeNumberPos(begin + shift_tail, end - shift_head),
               GetEdgeNumberColor(edge), edge.delta);
@@ -47,15 +48,15 @@ void Drawer::AddStaticEdgeWithCapacity(const QPointF& begin, const QPointF& end,
 void Drawer::AddDynamicEdgeWithCapacity(const QPointF& begin, const QPointF& end,
                                 const Edge& edge, size_t frame_id, size_t frames_number) {
     QPointF bend = CalcEdgeBendPos(begin, end);
-    QPointF shift_head = SetVectorLength(end - bend, DrawerSetup::kCenterPadding);
-    QPointF shift_tail = SetVectorLength(bend - begin, DrawerSetup::kCenterPadding);
+    QPointF shift_head = DrawerHelper::SetVectorLength(end - bend, DrawerHelper::kCenterPadding);
+    QPointF shift_tail = DrawerHelper::SetVectorLength(bend - begin, DrawerHelper::kCenterPadding);
     AddDynamicEdge(begin + shift_tail, end - shift_head, edge, frame_id, frames_number);
     AddNumber(CalcEdgeNumberPos(begin + shift_tail, end - shift_head),
               GetEdgeNumberColor(edge), edge.delta);
 }
 
-void Drawer::AddVertexWithId(const QPointF& pos, size_t num, Status status) {
-    AddVertex(pos, status);
+void Drawer::AddVertexWithId(const QPointF& pos, size_t num, Status status, bool is_selected) {
+    AddVertex(pos, status, is_selected);
     AddNumber(pos, GetVertexNumberColor(status), num);
 }
 
@@ -66,17 +67,17 @@ void Drawer::AddStaticEdge(const QPointF& begin, const QPointF& end, const Edge&
     QVector<QPointF> tail_points;
     tail_points << begin << bend << end;
     edge.tail.reset(new QwtPlotCurve());
-    edge.tail->setPen(GetEdgeColor(data.status), DrawerSetup::kEdgeWidth);
+    edge.tail->setPen(GetEdgeColor(data.status), DrawerHelper::kEdgeWidth);
     edge.tail->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.tail->setSamples(tail_points);
     edge.tail->attach(plot_.get());
 
     QVector<QPointF> head_points;
-    QPointF head_begin = RotateVector(end, bend, M_PI / 12 + M_PI / 60, DrawerSetup::kEdgeHeadSide);
-    QPointF head_end = RotateVector(end, bend, -M_PI / 12 + M_PI / 60, DrawerSetup::kEdgeHeadSide);
+    QPointF head_begin = DrawerHelper::RotateVector(end, bend, M_PI / 12 + M_PI / 60, DrawerHelper::kEdgeHeadSide);
+    QPointF head_end = DrawerHelper::RotateVector(end, bend, -M_PI / 12 + M_PI / 60, DrawerHelper::kEdgeHeadSide);
     head_points << head_begin << end << head_end;
     edge.head.reset(new QwtPlotCurve());
-    edge.head->setPen(GetEdgeColor(data.status), DrawerSetup::kEdgeWidth);
+    edge.head->setPen(GetEdgeColor(data.status), DrawerHelper::kEdgeWidth);
     edge.head->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.head->setSamples(head_points);
     edge.head->attach(plot_.get());
@@ -107,7 +108,7 @@ void Drawer::ResetState() {
 void Drawer::AddNumber(const QPointF& pos, const QColor& color, size_t num) {
     Number number;
     QwtText text(std::to_string(num).data());
-    text.setFont(DrawerSetup::kGraphFont);
+    text.setFont(DrawerHelper::kGraphFont);
     text.setColor(color);
     number.base.reset(new QwtPlotMarker());
     number.base -> setLabel(text);
@@ -117,14 +118,19 @@ void Drawer::AddNumber(const QPointF& pos, const QColor& color, size_t num) {
     numbers_.push_back(std::move(number));
 }
 
-void Drawer::AddVertex(const QPointF& pos, Status status) {
+void Drawer::AddVertex(const QPointF& pos, Status status, bool is_selected) {
     Vertex vertex;
     vertex.base.reset(new QwtPlotCurve());
     QwtSymbol* circle = new QwtSymbol();
     circle -> setStyle(QwtSymbol::Ellipse);
-    circle -> setPen(GetBorderColor(status), 3);
+    if (!is_selected) {
+        circle -> setPen(GetBorderColor(status), 3);
+        circle -> setSize(DrawerHelper::kVertexRadius);
+    } else {
+        circle -> setPen(GetBorderColor(status), 2);
+        circle -> setSize(DrawerHelper::kVertexRadius * 1.5);
+    }
     circle -> setBrush(GetVertexColor(status));
-    circle -> setSize(DrawerSetup::kVertexRadius);
     vertex.base -> setSamples({pos});
     vertex.base -> setSymbol(circle);
     vertex.base -> attach(plot_.get());
@@ -135,85 +141,56 @@ void Drawer::AddFlowInfo(size_t flow_rate, size_t pushed_flow, const QColor& col
     QwtText text(("boundary:" + std::to_string(1u << flow_rate) +
                   "\nflow pushed out:"
                   + std::to_string(pushed_flow)).data());
-    text.setFont(DrawerSetup::kFlowRateFont);
+    text.setFont(DrawerHelper::kFlowRateFont);
     text.setColor(color);
     text.setRenderFlags(Qt::AlignLeft | Qt::AlignTop);
     flow_info_.reset(new QwtPlotMarker());
     flow_info_ -> setLabel(text);
-    flow_info_ -> setValue(DrawerSetup::kFlowInfoPos);
+    flow_info_ -> setValue(DrawerHelper::kFlowInfoPos);
     flow_info_ -> attach(plot_.get());
 }
 
 QPointF Drawer::CalcEdgeNumberPos(const QPointF& begin, const QPointF& end) {
-    return CalcBendPos(begin, end, DrawerSetup::kCurveRate / 2);
+    return CalcBendPos(begin, end, DrawerHelper::kCurveRate / 2);
 }
 
 QPointF Drawer::CalcBendPos(const QPointF& begin, const QPointF& end, double rate) {
     QPointF seg_vector = end - begin;
     QPointF normal(seg_vector.y(), -seg_vector.x());
-    QPointF bend = (begin + 2 * end) / 3 + SetVectorLength(normal, rate);
+    QPointF bend = (begin + 2 * end) / 3 + DrawerHelper::SetVectorLength(normal, rate);
     return bend;
 }
 
 QPointF Drawer::CalcEdgeBendPos(const QPointF& begin, const QPointF& end) {
-    return CalcBendPos(begin, end, DrawerSetup::kCurveRate);
+    return CalcBendPos(begin, end, DrawerHelper::kCurveRate);
 }
 
 QColor Drawer::GetEdgeColor(Status status) const {
-    return DrawerSetup::kEdgeColor.at(status);
+    return DrawerHelper::kEdgeColor.at(status);
 }
 
 QColor Drawer::GetVertexColor(Status status) const {
-    auto it = DrawerSetup::kVertexColor.find(status);
-    assert(it != DrawerSetup::kVertexColor.end());
+    auto it = DrawerHelper::kVertexColor.find(status);
+    assert(it != DrawerHelper::kVertexColor.end());
     return it -> second;
 }
 
 QColor Drawer::GetBorderColor(Status status) const {
-    auto it = DrawerSetup::kBasicColor.find(status);
-    assert(it != DrawerSetup::kBasicColor.end());
+    auto it = DrawerHelper::kBasicColor.find(status);
+    assert(it != DrawerHelper::kBasicColor.end());
     return it -> second;
 }
 
 QColor Drawer::GetEdgeNumberColor(const Edge& edge) const {
-    auto it = DrawerSetup::kBasicColor.find(edge.status);
-    assert(it != DrawerSetup::kBasicColor.end());
+    auto it = DrawerHelper::kBasicColor.find(edge.status);
+    assert(it != DrawerHelper::kBasicColor.end());
     return it -> second;
 }
 
 QColor Drawer::GetVertexNumberColor(Status status) const{
-    auto it = DrawerSetup::kBasicColor.find(status);
-    assert(it != DrawerSetup::kBasicColor.end());
+    auto it = DrawerHelper::kBasicColor.find(status);
+    assert(it != DrawerHelper::kBasicColor.end());
     return it -> second;
-}
-
-QPointF Drawer::RotateVector(const QPointF& begin, const QPointF& end,  double angle, double len) {
-    QPointF direction(end - begin);
-    double polar = atan2(direction.y(), direction.x());
-    QPointF res = begin + QPointF(cos(polar + angle) * len, sin(polar + angle) * len);
-    return res;
-}
-
-QPointF Drawer::SetVectorLength(QPointF vec, double len) {
-    double cur_len = sqrt(vec.x() * vec.x() + vec.y() * vec.y());
-    return QPointF(vec.x() / cur_len * len, vec.y() / cur_len * len);
-}
-
-QPointF Drawer::GetVertexPosById(size_t number, size_t index) {
-    if (!index) {
-        return QPointF(DrawerSetup::kMaxX * DrawerSetup::kSinkPadingRate, DrawerSetup::kMaxY / 2);
-    }
-    if (index + 1 == number) {
-        return QPointF(DrawerSetup::kMaxX * (1 - DrawerSetup::kSinkPadingRate), DrawerSetup::kMaxY / 2);
-    }
-    if (index & 1u) {
-        return QPointF(DrawerSetup::kMaxX / 2, DrawerSetup::kMaxY / 2) +
-               RotateVector({0, 0}, {1, 0},
-                            M_PI / ((number + 1) / 2) * ((index + 1) / 2), DrawerSetup::kMaxX * (0.5 - DrawerSetup::kSinkPadingRate));
-    }
-    return QPointF(DrawerSetup::kMaxX / 2, DrawerSetup::kMaxY / 2) +
-           RotateVector({0, 0}, {1, 0},
-                        -M_PI / (number / 2) * ((index + 1) / 2), DrawerSetup::kMaxX * (0.5 - DrawerSetup::kSinkPadingRate));
 }
 
 void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge& data,
@@ -222,21 +199,21 @@ void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge
     QPointF bend = CalcEdgeBendPos(begin, end);
 
     QColor new_color = GetEdgeColor(data.status);
-    QColor prev_color = GetEdgeColor(mvc_messages::GetPreviousStatus(data.status));
+    QColor prev_color = GetEdgeColor(kernel_messages::GetPreviousStatus(data.status));
     QVector<QPointF> tail_points;
     tail_points << begin << bend << end;
     edge.tail.reset(new QwtPlotCurve());
     if (frame_id + 1 == frames_number) {
-        edge.tail->setPen(new_color, DrawerSetup::kEdgeWidth);
+        edge.tail->setPen(new_color, DrawerHelper::kEdgeWidth);
     } else {
-        QLinearGradient gradient(begin.x() / DrawerSetup::kMaxX,
-                                 (DrawerSetup::kMaxY - begin.y()) / DrawerSetup::kMaxY,
-                                 end.x() / DrawerSetup::kMaxX,
-                                 (DrawerSetup::kMaxY - end.y()) / DrawerSetup::kMaxY);
+        QLinearGradient gradient(begin.x() / DrawerHelper::kMaxX,
+                                 (DrawerHelper::kMaxY - begin.y()) / DrawerHelper::kMaxY,
+                                 end.x() / DrawerHelper::kMaxX,
+                                 (DrawerHelper::kMaxY - end.y()) / DrawerHelper::kMaxY);
         gradient.setCoordinateMode(QGradient::StretchToDeviceMode);
         gradient.setColorAt(std::max((frame_id + 1.0) / (frames_number + 1) - 0.1, 0.0), new_color);
         gradient.setColorAt(std::min((frame_id + 1.0) / (frames_number + 1) + 0.1, 1.0), prev_color);
-        QPen pen(gradient, DrawerSetup::kEdgeWidth);
+        QPen pen(gradient, DrawerHelper::kEdgeWidth);
         edge.tail->setPen(pen);
     }
     edge.tail->setCurveAttribute(QwtPlotCurve::Fitted);
@@ -244,14 +221,14 @@ void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge
     edge.tail->attach(plot_.get());
 
     QVector<QPointF> head_points;
-    QPointF head_begin = RotateVector(end, bend, M_PI / 12 + M_PI / 60, DrawerSetup::kEdgeHeadSide);
-    QPointF head_end = RotateVector(end, bend, -M_PI / 12 + M_PI / 60, DrawerSetup::kEdgeHeadSide);
+    QPointF head_begin = DrawerHelper::RotateVector(end, bend, M_PI / 12 + M_PI / 60, DrawerHelper::kEdgeHeadSide);
+    QPointF head_end = DrawerHelper::RotateVector(end, bend, -M_PI / 12 + M_PI / 60, DrawerHelper::kEdgeHeadSide);
     head_points << head_begin << end << head_end;
     edge.head.reset(new QwtPlotCurve());
     if (frame_id + 1 == frames_number) {
-        edge.head->setPen(new_color, DrawerSetup::kEdgeWidth);
+        edge.head->setPen(new_color, DrawerHelper::kEdgeWidth);
     } else {
-        edge.head->setPen(prev_color, DrawerSetup::kEdgeWidth);
+        edge.head->setPen(prev_color, DrawerHelper::kEdgeWidth);
     }
     edge.head->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.head->setSamples(head_points);
@@ -260,4 +237,7 @@ void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge
     edges_.push_back(std::move(edge));
 }
 
+QwtPlot* Drawer::GetQwtPlotPtr() {
+    return plot_.get();
+}
 }
