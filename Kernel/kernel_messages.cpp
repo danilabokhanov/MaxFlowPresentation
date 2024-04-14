@@ -12,5 +12,5 @@ Status GetPreviousStatus(Status status) {
             return Status::Basic;
     }
 }
-}
-}
+}  // namespace kernel_messages
+}  // namespace max_flow_app

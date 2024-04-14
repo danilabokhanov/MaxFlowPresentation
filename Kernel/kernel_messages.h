@@ -9,7 +9,7 @@ namespace kernel_messages {
 enum class Status { Basic, OnTheNetwork, OnThePath };
 
 struct BasicEdge {
-    size_t u, to, delta;
+    size_t u, to, delta = 0;
 };
 
 struct Edge {
@@ -25,6 +25,6 @@ struct MaxFlowData {
 };
 
 Status GetPreviousStatus(Status status);
-}
-}
-#endif // KERNEL_MESSAGES_H
+}  // namespace kernel_messages
+}  // namespace max_flow_app
+#endif  // KERNEL_MESSAGES_H

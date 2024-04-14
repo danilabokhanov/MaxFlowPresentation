@@ -5,10 +5,15 @@
 #include <string>
 
 namespace max_flow_app {
-MaxFlow::MaxFlow(size_t n, size_t m, const std::vector<BasicEdge> &edges)
-    : n_(n), m_(m), graph_(n), dist_(n_), processed_neighbors_(n),
-      vertices_(n_, Status::Basic), rand_generator_(std::chrono::steady_clock::now().time_since_epoch().count()) {
-    AddEdges(edges);
+MaxFlow::MaxFlow(size_t n, size_t m, std::initializer_list<BasicEdge> edges)
+    : n_(n),
+      m_(m),
+      graph_(n),
+      dist_(n_),
+      processed_neighbors_(n),
+      vertices_(n_, Status::Basic),
+      rand_generator_(std::chrono::steady_clock::now().time_since_epoch().count()) {
+    AddEdges(std::move(edges));
 }
 
 void MaxFlow::RunRequest() {
@@ -43,8 +48,8 @@ size_t MaxFlow::FindEdge(const MaxFlow::BasicEdge& edge) {
     return std::string::npos;
 }
 
-void MaxFlow::AddEdgeRequest(const MaxFlow::BasicEdge &edge) {
-    if (!isValid(edge)) {
+void MaxFlow::AddEdgeRequest(const MaxFlow::BasicEdge& edge) {
+    if (!IsValid(edge)) {
         return;
     }
     SaveState();
@@ -53,14 +58,14 @@ void MaxFlow::AddEdgeRequest(const MaxFlow::BasicEdge &edge) {
     ResetFlowInfo();
 }
 
-bool MaxFlow::isValid(const BasicEdge& edge) {
+bool MaxFlow::IsValid(const BasicEdge& edge) {
     return edge.u < n_ && edge.to < n_ && edge.u != edge.to && edge.delta;
 }
 
-void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge &edge) {
+void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge& edge) {
     SaveState();
     size_t index = 0;
-    for (Edge &e : edges_) {
+    for (Edge& e : edges_) {
         if (e.u == edge.u && e.to == edge.to) {
             break;
         }
@@ -69,7 +74,7 @@ void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge &edge) {
     if (index == edges_.size()) {
         return;
     }
-    index = std::min(index, index^1);
+    index = std::min(index, index ^ 1);
     edges_.erase(edges_.begin() + index);
     edges_.erase(edges_.begin() + index);
 
@@ -84,7 +89,7 @@ void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge &edge) {
         if (deleted_index != edges.size()) {
             edges.erase(edges.begin() + deleted_index);
         }
-        for (auto &edge : edges) {
+        for (auto& edge : edges) {
             if (edge > index) {
                 edge -= 2;
             }
@@ -95,11 +100,11 @@ void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge &edge) {
     ResetFlowInfo();
 }
 
-void MaxFlow::ExtendNetwork(size_t vertex, std::vector<bool>& used,
-                            std::vector<ssize_t>& parent, std::deque<size_t>& queue) {
+void MaxFlow::ExtendNetwork(size_t vertex, std::vector<bool>& used, std::vector<ssize_t>& parent,
+                            std::deque<size_t>& queue) {
     for (auto edge_id : graph_[vertex]) {
         auto [u, to, delta, _] = GetEdge(edge_id);
-        if (delta < (1 << flow_rate_)) {
+        if (delta < (1u << flow_rate_)) {
             continue;
         }
         if (!used[to]) {
@@ -120,7 +125,6 @@ void MaxFlow::ChangeNewEdgeStatus(size_t vertex, const std::vector<ssize_t>& par
         updated_edge_ = std::string::npos;
         flow_observable_.Notify();
     }
-
 }
 
 size_t MaxFlow::ExtractVertice(std::deque<size_t>& queue) {
@@ -186,7 +190,7 @@ void MaxFlow::ProcessPath(const std::vector<size_t>& path) {
         GetEdge(edge_id).status = Status::OnThePath;
         updated_edge_ = edge_id;
         flow_observable_.Notify();
-        GetEdge(edge_id).delta -=  (1 << flow_rate_);
+        GetEdge(edge_id).delta -= (1 << flow_rate_);
         GetReverseEdge(edge_id).delta += (1 << flow_rate_);
         vertices_[GetEdge(edge_id).to] = Status::OnThePath;
         updated_edge_ = std::string::npos;
@@ -196,30 +200,30 @@ void MaxFlow::ProcessPath(const std::vector<size_t>& path) {
     network_observable_.Notify();
 }
 
-MaxFlow::Edge &MaxFlow::GetEdge(size_t index) {
+MaxFlow::Edge& MaxFlow::GetEdge(size_t index) {
     return edges_[index];
 }
 
-MaxFlow::Edge &MaxFlow::GetReverseEdge(size_t index) {
+MaxFlow::Edge& MaxFlow::GetReverseEdge(size_t index) {
     return edges_[index ^ 1];
 }
 
-const MaxFlow::Edge &MaxFlow::GetEdge(size_t index) const {
+const MaxFlow::Edge& MaxFlow::GetEdge(size_t index) const {
     return edges_[index];
 }
 
-const MaxFlow::Edge &MaxFlow::GetReverseEdge(size_t index) const {
+const MaxFlow::Edge& MaxFlow::GetReverseEdge(size_t index) const {
     return edges_[index ^ 1];
 }
 
 void MaxFlow::ResetState() {
-    for (auto &vertex_status : vertices_) {
+    for (auto& vertex_status : vertices_) {
         vertex_status = Status::Basic;
     }
     flow_rate_ = 0;
-    for (auto &edge : edges_) {
+    for (auto& edge : edges_) {
         edge.status = Status::Basic;
-        while ((1 << flow_rate_) < edge.delta) {
+        while ((1u << flow_rate_) < edge.delta) {
             flow_rate_++;
         }
     }
@@ -232,7 +236,7 @@ void MaxFlow::ResetFlowInfo() {
     network_observable_.Notify();
 }
 
-void MaxFlow::AddEdges(const std::vector<BasicEdge> &edges) {
+void MaxFlow::AddEdges(std::initializer_list<BasicEdge> edges) {
     edges_.reserve(m_ << 1);
     for (auto [u, to, delta] : edges) {
         edges_.push_back({.u = u, .to = to, .delta = delta});
@@ -243,25 +247,27 @@ void MaxFlow::AddEdges(const std::vector<BasicEdge> &edges) {
 }
 
 MaxFlow::Data MaxFlow::GetData() const {
-    return {.edges = edges_, .vertices = vertices_,
-            .update_edge = updated_edge_, .flow_rate = flow_rate_,
-        .pushed_flow = pushed_flow_};
+    return {.edges = edges_,
+            .vertices = vertices_,
+            .update_edge = updated_edge_,
+            .flow_rate = flow_rate_,
+            .pushed_flow = pushed_flow_};
 }
 
 void MaxFlow::RegisterNetworkObserver(observer_pattern::Observer<Data>* observer) {
-    network_observable_.Subscribe(observer);
+    assert(network_observable_.Subscribe(observer));
 }
 
 void MaxFlow::RegisterFlowObserver(observer_pattern::Observer<Data>* observer) {
-    flow_observable_.Subscribe(observer);
+    assert(flow_observable_.Subscribe(observer));
 }
 
 void MaxFlow::RegisterCleanupObserver(observer_pattern::Observer<void>* observer) {
-    сleanup_observable_.Subscribe(observer);
+    assert(cleanup_observable_.Subscribe(observer));
 }
 
 void MaxFlow::RegisterUnlockObserver(observer_pattern::Observer<void>* observer) {
-    unlock_observable_.Subscribe(observer);
+    assert(unlock_observable_.Subscribe(observer));
 }
 
 void MaxFlow::ChangeVerticesNumberRequest(size_t new_number) {
@@ -375,11 +381,10 @@ void MaxFlow::RecoverPrevStateRequest() {
     edges_.clear();
     vertices_.resize(n_);
     for (auto [u, to, delta] : state.edges) {
-        edges_.push_back({.u = u, .to = to,
-                          .delta = delta, .status = Status::Basic});
+        edges_.push_back({.u = u, .to = to, .delta = delta, .status = Status::Basic});
     }
     network_observable_.Notify();
-    сleanup_observable_.Notify();
+    cleanup_observable_.Notify();
     unlock_observable_.Notify();
 }
-}
+}  // namespace max_flow_app

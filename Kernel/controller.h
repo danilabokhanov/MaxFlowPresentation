@@ -8,17 +8,19 @@
 namespace max_flow_app {
 class Controller {
 public:
-    using BasicEdge = kernel_messages::BasicEdge;
+    Controller(MaxFlow* model_ptr, GeomModel* geom_model_ptr);
+
     using CommandData = interface_messages::CommandData;
     using ViewObserver = observer_pattern::Observer<CommandData>;
-    using MousePosition = interface_messages::MousePosition;
 
-    Controller(MaxFlow* model_ptr, GeomModel* geom_model_ptr);
     ViewObserver* GetSubscriberPtr();
 
 private:
+    using BasicEdge = kernel_messages::BasicEdge;
+    using MousePosition = interface_messages::MousePosition;
+
     void CallChangeVerticesNumber(size_t new_number);
-    void CallAddEdge(const BasicEdge &edge);
+    void CallAddEdge(const BasicEdge& edge);
     void CallDeleteEdge(const BasicEdge& egde);
     void CallRun();
     void CallGenRandomSample();
@@ -27,12 +29,12 @@ private:
     void CallMousePressedHandler(const MousePosition& pos);
     void CallMouseMovedHandler(const MousePosition& pos);
     void CallMouseReleasedHandler(const MousePosition& pos);
-
     void HandleData(const CommandData& data);
+
     MaxFlow* model_ptr_;
     GeomModel* geom_model_ptr_;
     ViewObserver view_observer_;
 };
-}
+}  // namespace max_flow_app
 
 #endif  // CONTROLLER_H
