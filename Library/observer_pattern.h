@@ -89,12 +89,19 @@ public:
     Observable& operator=(const Observable&) = delete;
     Observable& operator=(Observable&&) = delete;
 
-    void Subscribe(SubscriberPtr consumer) {
-        assert(consumer);
-
+    bool Subscribe(SubscriberPtr consumer) {
+        if (!consumer) {
+            return false;
+        }
+        for (auto subscriber_ptr : subscribers_) {
+            if (subscriber_ptr == consumer) {
+                return false;
+            }
+        }
         subscribers_.push_back(consumer);
         consumer->connection_ = this;
         consumer->OnSubscribe(std::move(data_producer_()));
+        return true;
     }
 
     void Notify() {
@@ -204,12 +211,19 @@ public:
     Observable& operator=(const Observable&) = delete;
     Observable& operator=(Observable&&) = delete;
 
-    void Subscribe(SubscriberPtr consumer) {
-        assert(consumer);
-
+    bool Subscribe(SubscriberPtr consumer) {
+        if (!consumer) {
+            return false;
+        }
+        for (auto subscriber_ptr : subscribers_) {
+            if (subscriber_ptr == consumer) {
+                return false;
+            }
+        }
         subscribers_.push_back(consumer);
         consumer->connection_ = this;
         consumer->OnSubscribe();
+        return true;
     }
 
     void Notify() {
