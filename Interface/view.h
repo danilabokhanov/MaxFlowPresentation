@@ -15,13 +15,9 @@ public:
     using FrameQueueData = interface_messages::FrameQueueData;
     using CommandData = interface_messages::CommandData;
     using FrameQueueObserver = observer_pattern::Observer<FrameQueueData>;
-    using CommandObservable = observer_pattern::Observable<CommandData>;
     using CommandObserver = observer_pattern::Observer<CommandData>;
-    using BasicEdge = kernel_messages::BasicEdge;
-    using MousePosition = interface_messages::MousePosition;
 
     FrameQueueObserver* GetSubscriberPtr();
-    CommandData ProduceViewMessage() const;
     void RegisterController(CommandObserver* observer);
 
 private slots:
@@ -37,11 +33,16 @@ private slots:
     void MouseReleased(const QPointF& pos);
 
 private:
+    using CommandObservable = observer_pattern::Observable<CommandData>;
+    using BasicEdge = kernel_messages::BasicEdge;
+    using MousePosition = interface_messages::MousePosition;
+
     void SetupButtons();
     void SetupPicker();
     void LockInterface();
     void UnlockInterface();
     void UpdateGraphView(const FrameQueueData& data);
+    const CommandData& ProduceViewMessage() const;
 
     MainWindow main_window_;
     Drawer drawer_;
@@ -50,5 +51,5 @@ private:
     CommandData message_;
     QwtPlotPicker* picker_;
 };
-}
+}  // namespace max_flow_app
 #endif  // VIEW_H

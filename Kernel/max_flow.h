@@ -65,7 +65,7 @@ private:
     };
 
     inline static const size_t kMinVerticesNum = 2, kMaxVerticesNum = 10, kMaxEdgeCapacity = 100,
-        kStatesStorageSize = 10;
+                               kStatesStorageSize = 10;
     size_t n_ = 2, m_ = 0;
     std::vector<std::vector<size_t>> graph_ = std::vector<std::vector<size_t>>(n_);
     std::vector<size_t> dist_ = std::vector<size_t>(n_);

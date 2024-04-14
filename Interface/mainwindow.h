@@ -8,18 +8,17 @@
 #include <QPushButton>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { // NOLINT
+namespace Ui {  // NOLINT
 class MainWindow;
 }
 QT_END_NAMESPACE
 
 namespace max_flow_app {
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
     QFrame* GetQwtFramePtr() const;
@@ -34,10 +33,13 @@ public:
     QPushButton* GetRandomSampleButtonPtr() const;
     QPushButton* GetCancelButtonPtr() const;
     QPushButton* GetSkipButtonPtr() const;
+    size_t GetVerticesSpinBoxNumber() const;
+    size_t GetUSpinBoxNumber() const;
+    size_t GetVSpinBoxNumber() const;
+    size_t GetWeightBoxNumber() const;
+
 private:
-
     std::unique_ptr<Ui::MainWindow> ui_;
-
 };
-}
-#endif // MAINWINDOW_H
+}  // namespace max_flow_app
+#endif  // MAINWINDOW_H

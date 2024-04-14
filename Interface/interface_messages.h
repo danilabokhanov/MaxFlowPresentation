@@ -34,21 +34,21 @@ struct MousePosition {
 };
 
 struct CommandData {
-enum class SignalType {
-        CHANGE_VERTICES_NUMBER,
-        ADD_EDGE,
-        DELETE_EDGE,
-        RUN,
-        GEN_RANDOM_SAMPLE,
-        CANCEL,
-        SKIP,
-        MOUSE_PRESSED,
-        MOUSE_MOVED,
-        MOUSE_RELEASED
+    enum class SignalType {
+        ChangeVerticesNumber,
+        AddEdge,
+        DeleteEdge,
+        Run,
+        GenRandomSample,
+        Cancel,
+        Skip,
+        MousePressed,
+        MouseMoved,
+        MouseReleased
     } signal_type;
     std::variant<size_t, BasicEdge, MousePosition, std::monostate> args;
 };
-}
-}
+}  // namespace interface_messages
+}  // namespace max_flow_app
 
 #endif  // INTERFACE_MESSAGES_H

@@ -4,10 +4,11 @@
 #include <numbers>
 
 namespace max_flow_app {
-GeomModel::GeomModel(): timer_(new QTimer(this)) {}
+GeomModel::GeomModel() : timer_(new QTimer(this)) {
+}
 
 void GeomModel::RegisterView(StateObserver* observer) {
-    geom_model_observable_.Subscribe(observer);
+    assert(geom_model_observable_.Subscribe(observer));
     StartTimer();
 }
 
@@ -38,16 +39,21 @@ void GeomModel::ProcessNextState() {
 void GeomModel::AddDynamicState(const MaxFlowData& data) {
     for (size_t i = 0; i < kFPSRate; i++) {
         GeomModelData geom_model{.edges = data.edges,
-            .vertices = data.vertices, .edge_id = data.update_edge,
-            .frame_id = i, .frames_number = kFPSRate,
-            .flow_rate = data.flow_rate, .pushed_flow = data.pushed_flow};
+                                 .vertices = data.vertices,
+                                 .edge_id = data.update_edge,
+                                 .frame_id = i,
+                                 .frames_number = kFPSRate,
+                                 .flow_rate = data.flow_rate,
+                                 .pushed_flow = data.pushed_flow};
         states_.push_back({.geom_model = std::move(geom_model)});
     }
 }
 
 void GeomModel::AddStaticState(const MaxFlowData& data) {
-    GeomModelData geom_model{.edges = data.edges, .vertices = data.vertices,
-                  .edge_id = std::string::npos, .flow_rate = data.flow_rate,
+    GeomModelData geom_model{.edges = data.edges,
+                             .vertices = data.vertices,
+                             .edge_id = std::string::npos,
+                             .flow_rate = data.flow_rate,
                              .pushed_flow = data.pushed_flow};
     states_.push_back({.geom_model = std::move(geom_model)});
 }
@@ -58,8 +64,8 @@ void GeomModel::AddUnlockNotification() {
 
 void GeomModel::StartTimer() {
     connect(timer_.get(), &QTimer::timeout, this, &GeomModel::ProcessNextState);
-    timer_ -> setInterval(kTimerInterval);
-    timer_ -> start();
+    timer_->setInterval(kTimerInterval);
+    timer_->start();
 }
 
 size_t GeomModel::GetFPSRate() {
@@ -67,8 +73,7 @@ size_t GeomModel::GetFPSRate() {
 }
 
 void GeomModel::SkipFrames() {
-    while (states_.size() > 2u || (states_.size() == 2u &&
-                                   !states_.back().is_unlock)) {
+    while (states_.size() > 2u || (states_.size() == 2u && !states_.back().is_unlock)) {
         states_.pop_front();
     }
 }
@@ -87,26 +92,30 @@ void GeomModel::ResetPos(size_t n) {
 
 QPointF GeomModel::GetVertexPosById(size_t n, size_t index) const {
     if (!index) {
-        return QPointF(DrawerHelper::kMaxX * DrawerHelper::kSinkPadingRate, DrawerHelper::kMaxY / 2);
+        return QPointF(DrawerHelper::kMaxX * DrawerHelper::kSinkPadingRate,
+                       DrawerHelper::kMaxY / 2);
     }
     if (index + 1 == n) {
-        return QPointF(DrawerHelper::kMaxX * (1 - DrawerHelper::kSinkPadingRate), DrawerHelper::kMaxY / 2);
+        return QPointF(DrawerHelper::kMaxX * (1 - DrawerHelper::kSinkPadingRate),
+                       DrawerHelper::kMaxY / 2);
     }
     if (index & 1u) {
         return QPointF(DrawerHelper::kMaxX / 2, DrawerHelper::kMaxY / 2) +
-               DrawerHelper::RotateVector({0, 0}, {1, 0},
-                        std::numbers::pi / ((n + 1) / 2) * ((index + 1) / 2), DrawerHelper::kMaxX * (0.5 - DrawerHelper::kSinkPadingRate));
+               DrawerHelper::RotateVector(
+                   {0, 0}, {1, 0}, std::numbers::pi / ((n + 1) / 2) * ((index + 1) / 2),
+                   DrawerHelper::kMaxX * (0.5 - DrawerHelper::kSinkPadingRate));
     }
     return QPointF(DrawerHelper::kMaxX / 2, DrawerHelper::kMaxY / 2) +
            DrawerHelper::RotateVector({0, 0}, {1, 0},
-                        -std::numbers::pi / (n / 2) * ((index + 1) / 2), DrawerHelper::kMaxX * (0.5 - DrawerHelper::kSinkPadingRate));
+                                      -std::numbers::pi / (n / 2) * ((index + 1) / 2),
+                                      DrawerHelper::kMaxX * (0.5 - DrawerHelper::kSinkPadingRate));
 }
 
 GeomModel::FrameQueueData GeomModel::SendFrameToView() {
     if (states_.empty()) {
         return FrameQueueData{};
     }
-    auto state =  std::move(states_.front());
+    auto state = std::move(states_.front());
     if (!state.is_unlock) {
         last_state_ = state.geom_model;
     }
@@ -137,7 +146,6 @@ void GeomModel::UpdateSelectedVertex(const QPointF& pos) {
     }
 }
 
-
 bool GeomModel::IsVertexIntersected(size_t index, const QPointF& pos, QPointF& vec) const {
     for (size_t i = 0; i < pos_.size(); i++) {
         if (i == index) {
@@ -162,8 +170,8 @@ void GeomModel::MoveVertexToPos(QPointF pos) {
             pos += QPointF(2 * DrawerHelper::kCenterPadding + DrawerHelper::kDistEps, 0);
         } else {
             pos -= vec;
-            pos += DrawerHelper::SetVectorLength(vec,
-            2 * DrawerHelper::kCenterPadding + DrawerHelper::kDistEps);
+            pos += DrawerHelper::SetVectorLength(
+                vec, 2 * DrawerHelper::kCenterPadding + DrawerHelper::kDistEps);
         }
     }
     pos.rx() = std::max(pos.rx(), DrawerHelper::kCenterPadding);
@@ -192,4 +200,4 @@ void GeomModel::AddLastFrameToQueue() {
         states_.emplace_back(FrameQueueData{.geom_model = last_state_});
     }
 }
-}
+}  // namespace max_flow_app

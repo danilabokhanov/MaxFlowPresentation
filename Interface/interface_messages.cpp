@@ -12,5 +12,5 @@ Status GetPreviousStatus(Status status) {
             return Status::Basic;
     }
 }
-}
-}
+}  // namespace mvc_messages
+}  // namespace max_flow_app
