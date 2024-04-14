@@ -1,13 +1,13 @@
 #include "drawer.h"
-#include <math.h>
+#include <numbers>
 #include <QwtWeedingCurveFitter>
 #include <QEventLoop>
 #include "drawer_helper.h"
 
 namespace max_flow_app {
 Drawer::Drawer(QFrame* frame): layout_(new QVBoxLayout(frame)), plot_(new QwtPlot(frame)) {
-    layout_ -> addWidget(plot_.get());
-    frame -> setLayout(layout_.get());
+    layout_ -> addWidget(plot_);
+    frame -> setLayout(layout_);
     plot_ -> setAxisScale(QwtPlot::xBottom, 0, DrawerHelper::kMaxX);
     plot_ -> setAxisScale(QwtPlot::yLeft, 0, DrawerHelper::kMaxY);
     plot_->setAxisVisible(QwtAxis::YLeft, false);
@@ -70,17 +70,19 @@ void Drawer::AddStaticEdge(const QPointF& begin, const QPointF& end, const Edge&
     edge.tail->setPen(GetEdgeColor(data.status), DrawerHelper::kEdgeWidth);
     edge.tail->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.tail->setSamples(tail_points);
-    edge.tail->attach(plot_.get());
+    edge.tail->attach(plot_);
 
     QVector<QPointF> head_points;
-    QPointF head_begin = DrawerHelper::RotateVector(end, bend, M_PI / 12 + M_PI / 60, DrawerHelper::kEdgeHeadSide);
-    QPointF head_end = DrawerHelper::RotateVector(end, bend, -M_PI / 12 + M_PI / 60, DrawerHelper::kEdgeHeadSide);
+    QPointF head_begin = DrawerHelper::RotateVector(end, bend,
+            std::numbers::pi / 12 + std::numbers::pi / 60, DrawerHelper::kEdgeHeadSide);
+    QPointF head_end = DrawerHelper::RotateVector(end, bend,
+           -std::numbers::pi / 12 + std::numbers::pi / 60, DrawerHelper::kEdgeHeadSide);
     head_points << head_begin << end << head_end;
     edge.head.reset(new QwtPlotCurve());
     edge.head->setPen(GetEdgeColor(data.status), DrawerHelper::kEdgeWidth);
     edge.head->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.head->setSamples(head_points);
-    edge.head->attach(plot_.get());
+    edge.head->attach(plot_);
 
     edges_.push_back(std::move(edge));
 }
@@ -113,7 +115,7 @@ void Drawer::AddNumber(const QPointF& pos, const QColor& color, size_t num) {
     number.base.reset(new QwtPlotMarker());
     number.base -> setLabel(text);
     number.base -> setValue(pos);
-    number.base-> attach(plot_.get());
+    number.base-> attach(plot_);
 
     numbers_.push_back(std::move(number));
 }
@@ -133,7 +135,7 @@ void Drawer::AddVertex(const QPointF& pos, Status status, bool is_selected) {
     circle -> setBrush(GetVertexColor(status));
     vertex.base -> setSamples({pos});
     vertex.base -> setSymbol(circle);
-    vertex.base -> attach(plot_.get());
+    vertex.base -> attach(plot_);
     vertices_.push_back(std::move(vertex));
 }
 
@@ -147,7 +149,7 @@ void Drawer::AddFlowInfo(size_t flow_rate, size_t pushed_flow, const QColor& col
     flow_info_.reset(new QwtPlotMarker());
     flow_info_ -> setLabel(text);
     flow_info_ -> setValue(DrawerHelper::kFlowInfoPos);
-    flow_info_ -> attach(plot_.get());
+    flow_info_ -> attach(plot_);
 }
 
 QPointF Drawer::CalcEdgeNumberPos(const QPointF& begin, const QPointF& end) {
@@ -218,11 +220,13 @@ void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge
     }
     edge.tail->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.tail->setSamples(tail_points);
-    edge.tail->attach(plot_.get());
+    edge.tail->attach(plot_);
 
     QVector<QPointF> head_points;
-    QPointF head_begin = DrawerHelper::RotateVector(end, bend, M_PI / 12 + M_PI / 60, DrawerHelper::kEdgeHeadSide);
-    QPointF head_end = DrawerHelper::RotateVector(end, bend, -M_PI / 12 + M_PI / 60, DrawerHelper::kEdgeHeadSide);
+    QPointF head_begin = DrawerHelper::RotateVector(end, bend,
+                std::numbers::pi / 12 + std::numbers::pi / 60, DrawerHelper::kEdgeHeadSide);
+    QPointF head_end = DrawerHelper::RotateVector(end, bend,
+               -std::numbers::pi / 12 + std::numbers::pi / 60, DrawerHelper::kEdgeHeadSide);
     head_points << head_begin << end << head_end;
     edge.head.reset(new QwtPlotCurve());
     if (frame_id + 1 == frames_number) {
@@ -232,12 +236,12 @@ void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge
     }
     edge.head->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.head->setSamples(head_points);
-    edge.head->attach(plot_.get());
+    edge.head->attach(plot_);
 
     edges_.push_back(std::move(edge));
 }
 
 QwtPlot* Drawer::GetQwtPlotPtr() {
-    return plot_.get();
+    return plot_;
 }
 }

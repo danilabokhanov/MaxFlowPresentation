@@ -110,7 +110,7 @@ public:
         }
     }
 
-    DataType GetData() {
+    const DataType& GetData() {
         return data_producer_();
     }
 

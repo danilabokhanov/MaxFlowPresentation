@@ -22,8 +22,10 @@ public:
     void DrawGraph(const Data& data);
     QwtPlot* GetQwtPlotPtr();
 private:
-    std::unique_ptr<QVBoxLayout> layout_;
-    std::unique_ptr<QwtPlot> plot_;
+    // std::unique_ptr<QVBoxLayout> layout_;
+    // std::unique_ptr<QwtPlot> plot_;
+    QVBoxLayout* layout_;
+    QwtPlot* plot_;
 
     struct Vertex {
         std::unique_ptr<QwtPlotCurve> base;

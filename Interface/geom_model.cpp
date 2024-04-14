@@ -1,7 +1,7 @@
-#include <cmath>
 #include <QAction>
 #include "geom_model.h"
 #include "Interface/drawer_helper.h"
+#include <numbers>
 
 namespace max_flow_app {
 GeomModel::GeomModel(): timer_(new QTimer(this)) {}
@@ -95,11 +95,11 @@ QPointF GeomModel::GetVertexPosById(size_t n, size_t index) const {
     if (index & 1u) {
         return QPointF(DrawerHelper::kMaxX / 2, DrawerHelper::kMaxY / 2) +
                DrawerHelper::RotateVector({0, 0}, {1, 0},
-                            M_PI / ((n + 1) / 2) * ((index + 1) / 2), DrawerHelper::kMaxX * (0.5 - DrawerHelper::kSinkPadingRate));
+                        std::numbers::pi / ((n + 1) / 2) * ((index + 1) / 2), DrawerHelper::kMaxX * (0.5 - DrawerHelper::kSinkPadingRate));
     }
     return QPointF(DrawerHelper::kMaxX / 2, DrawerHelper::kMaxY / 2) +
            DrawerHelper::RotateVector({0, 0}, {1, 0},
-                        -M_PI / (n / 2) * ((index + 1) / 2), DrawerHelper::kMaxX * (0.5 - DrawerHelper::kSinkPadingRate));
+                        -std::numbers::pi / (n / 2) * ((index + 1) / 2), DrawerHelper::kMaxX * (0.5 - DrawerHelper::kSinkPadingRate));
 }
 
 GeomModel::FrameQueueData GeomModel::SendFrameToView() {
@@ -112,7 +112,7 @@ GeomModel::FrameQueueData GeomModel::SendFrameToView() {
     }
     states_.pop_front();
     if (size_t vertices_number = state.geom_model.vertices.size();
-        vertices_number != pos_.size()) {
+        vertices_number != pos_.size() && vertices_number) {
         ResetPos(vertices_number);
     }
     state.geom_model.pos = pos_;

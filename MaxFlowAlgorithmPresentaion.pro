@@ -1,11 +1,12 @@
 QT       += core gui
 
 QMAKE_CXXFLAGS += -fsanitize=address
+QMAKE_CXXFLAGS += -std=c++20
 QMAKE_LFLAGS += -fsanitize=address
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++17 warn_on
+CONFIG += c++20 warn_on
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
