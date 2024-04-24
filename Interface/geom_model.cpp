@@ -40,7 +40,7 @@ void GeomModel::AddDynamicState(const MaxFlowData& data) {
     for (size_t i = 0; i < kFPSRate; i++) {
         GeomModelData geom_model{.edges = data.edges,
                                  .vertices = data.vertices,
-                                 .edge_id = data.update_edge,
+                                 .edge_id = data.updated_edge,
                                  .frame_id = i,
                                  .frames_number = kFPSRate,
                                  .flow_rate = data.flow_rate,

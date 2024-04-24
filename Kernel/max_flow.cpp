@@ -249,7 +249,7 @@ void MaxFlow::AddEdges(std::initializer_list<BasicEdge> edges) {
 MaxFlow::Data MaxFlow::GetData() const {
     return {.edges = edges_,
             .vertices = vertices_,
-            .update_edge = updated_edge_,
+            .updated_edge = updated_edge_,
             .flow_rate = flow_rate_,
             .pushed_flow = pushed_flow_};
 }
@@ -273,18 +273,22 @@ void MaxFlow::RegisterUnlockObserver(observer_pattern::Observer<void>* observer)
 void MaxFlow::ChangeVerticesNumberRequest(size_t new_number) {
     SaveState();
     vertices_.resize(new_number, Status::Basic);
-    std::vector<Edge> new_edges;
-    std::vector<std::vector<size_t>> new_graph(new_number);
-    for (const auto& edge : edges_) {
-        if (edge.u < new_number && edge.to < new_number) {
-            new_graph[edge.u].push_back(new_edges.size());
-            new_edges.push_back(edge);
+    if (new_number < n_) {
+        std::vector<Edge> new_edges;
+        std::vector<std::vector<size_t>> new_graph(new_number);
+        for (const auto& edge : edges_) {
+            if (edge.u < new_number && edge.to < new_number) {
+                new_graph[edge.u].push_back(new_edges.size());
+                new_edges.push_back(edge);
+            }
         }
+        m_ = (new_edges.size() >> 1);
+        graph_ = std::move(new_graph);
+        edges_ = std::move(new_edges);
+    } else {
+        graph_.resize(new_number);
     }
     n_ = new_number;
-    m_ = (new_edges.size() >> 1);
-    graph_ = std::move(new_graph);
-    edges_ = std::move(new_edges);
     ResetState();
     ResetFlowInfo();
 }
@@ -294,9 +298,6 @@ size_t MaxFlow::GenRandNum(size_t l, size_t r) {
 }
 
 void MaxFlow::AddEdge(const BasicEdge& edge) {
-    if (edge.u == edge.to) {
-        return;
-    }
     size_t index = FindEdge(edge);
     if (index == std::string::npos) {
         edges_.push_back({.u = edge.u, .to = edge.to, .delta = edge.delta});

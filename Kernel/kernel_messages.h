@@ -20,7 +20,7 @@ struct Edge {
 struct MaxFlowData {
     std::vector<Edge> edges;
     std::vector<Status> vertices;
-    size_t update_edge = std::string::npos;
+    size_t updated_edge = std::string::npos;
     size_t flow_rate = 0, pushed_flow = 0;
 };
 

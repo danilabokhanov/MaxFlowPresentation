@@ -59,7 +59,6 @@ private:
 
     struct State {
         size_t n, m, flow_rate = 0;
-        std::vector<size_t> capacity;
         std::vector<std::vector<size_t>> graph;
         std::vector<BasicEdge> edges;
     };
