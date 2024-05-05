@@ -100,7 +100,7 @@ public:
         }
         subscribers_.push_back(consumer);
         consumer->connection_ = this;
-        consumer->OnSubscribe(std::move(data_producer_()));
+        consumer->OnSubscribe(data_producer_());
         return true;
     }
 
@@ -117,7 +117,7 @@ public:
         }
     }
 
-    const DataType& GetData() {
+    DataType GetData() {
         return data_producer_();
     }
 

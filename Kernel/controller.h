@@ -21,7 +21,7 @@ private:
 
     void CallChangeVerticesNumber(size_t new_number);
     void CallAddEdge(const BasicEdge& edge);
-    void CallDeleteEdge(const BasicEdge& egde);
+    void CallDeleteEdge(const BasicEdge& edge);
     void CallRun();
     void CallGenRandomSample();
     void CallCancel();

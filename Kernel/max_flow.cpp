@@ -55,7 +55,6 @@ void MaxFlow::AddEdgeRequest(const MaxFlow::BasicEdge& edge) {
     SaveState();
     AddEdge(edge);
     ResetState();
-    ResetFlowInfo();
 }
 
 bool MaxFlow::IsValid(const BasicEdge& edge) {
@@ -97,7 +96,6 @@ void MaxFlow::DeleteEdgeRequest(const MaxFlow::BasicEdge& edge) {
     }
     m_--;
     ResetState();
-    ResetFlowInfo();
 }
 
 void MaxFlow::ExtendNetwork(size_t vertex, std::vector<bool>& used, std::vector<ssize_t>& parent,
@@ -228,10 +226,6 @@ void MaxFlow::ResetState() {
         }
     }
     updated_edge_ = std::string::npos;
-    network_observable_.Notify();
-}
-
-void MaxFlow::ResetFlowInfo() {
     pushed_flow_ = 0;
     network_observable_.Notify();
 }
@@ -290,7 +284,6 @@ void MaxFlow::ChangeVerticesNumberRequest(size_t new_number) {
     }
     n_ = new_number;
     ResetState();
-    ResetFlowInfo();
 }
 
 size_t MaxFlow::GenRandNum(size_t l, size_t r) {
@@ -322,7 +315,6 @@ void MaxFlow::GenRandomSampleRequest() {
         AddEdge({.u = GenRandNum(0, i - 1), .to = i, .delta = GenRandNum(1, kMaxEdgeCapacity)});
     }
     ResetState();
-    ResetFlowInfo();
 }
 
 void MaxFlow::SetEdgeStatus(size_t index, Status status) {
