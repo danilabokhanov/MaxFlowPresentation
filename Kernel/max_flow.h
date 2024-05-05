@@ -53,7 +53,6 @@ private:
     void SetEdgeStatus(size_t index, Status status);
     bool IsValid(const BasicEdge& edge);
     void ResetState();
-    void ResetFlowInfo();
     void SaveState();
     size_t GenRandNum(size_t l, size_t r);
 

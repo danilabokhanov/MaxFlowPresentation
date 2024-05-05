@@ -15,6 +15,8 @@ struct BasicEdge {
 struct Edge {
     size_t u, to, delta;
     Status status = Status::Basic;
+
+    bool operator==(const Edge& other) const = default;
 };
 
 struct MaxFlowData {
@@ -22,6 +24,8 @@ struct MaxFlowData {
     std::vector<Status> vertices;
     size_t updated_edge = std::string::npos;
     size_t flow_rate = 0, pushed_flow = 0;
+
+    bool operator==(const MaxFlowData& other) const = default;
 };
 
 Status GetPreviousStatus(Status status);
