@@ -29,6 +29,8 @@ private:
     void CallMousePressedHandler(const MousePosition& pos);
     void CallMouseMovedHandler(const MousePosition& pos);
     void CallMouseReleasedHandler(const MousePosition& pos);
+    void CallChangeSpeed(size_t slider_pos);
+    void CallChangeLatency(size_t slider_pos);
     void HandleData(const CommandData& data);
 
     MaxFlow* model_ptr_;

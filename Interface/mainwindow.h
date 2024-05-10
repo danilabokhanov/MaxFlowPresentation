@@ -6,6 +6,8 @@
 #include <QFrame>
 #include <QSpinBox>
 #include <QPushButton>
+#include <QLabel>
+#include <QSlider>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {  // NOLINT
@@ -33,6 +35,10 @@ public:
     QPushButton* GetRandomSampleButtonPtr() const;
     QPushButton* GetCancelButtonPtr() const;
     QPushButton* GetSkipButtonPtr() const;
+    QSlider* GetSpeedSliderPtr() const;
+    QSlider* GetLatencySliderPtr() const;
+    size_t GetSpeedSliderNumber() const;
+    size_t GetLatencySliderNumber() const;
     size_t GetVerticesSpinBoxNumber() const;
     size_t GetUSpinBoxNumber() const;
     size_t GetVSpinBoxNumber() const;

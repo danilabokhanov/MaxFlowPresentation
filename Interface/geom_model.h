@@ -28,6 +28,8 @@ public:
     ClearSignalObserver* GetClearSignalObserverPtr();
     UnlockObserver* GetUnlockObserverPtr();
     void SkipFramesRequest();
+    void ChangeSpeedRequest(size_t slider_pos);
+    void ChangeLatencyRequest(size_t slider_pos);
     static size_t GetFPSRate();
     void HandleMousePressedAction(const MousePosition& pos);
     void HandleMouseMovedAction(const MousePosition& pos);
@@ -56,6 +58,13 @@ private:
 
     static const size_t kFPSRate = 60;
     static const size_t kTimerInterval = 1000 / kFPSRate;
+    static const size_t kBasicSpeed = kFPSRate;
+    static const size_t kBasicLatency = kFPSRate;
+    inline static const std::vector<double> kSpeedCoef = {7.0, 3.0, 2.5, 2.0, 1.5, 1.0,
+                                                   0.75, 0.5, 0.33, 0.25, 0.166};
+    inline static const std::vector<double> kLatencyCoef = {3.0, 2.0, 1.5, 1.0, 0.75, 0.5, 0.3};
+    size_t speed_ = kBasicSpeed;
+    size_t latency_ = kBasicLatency;
     std::unique_ptr<QTimer> timer_;
     std::deque<FrameQueueData> states_;
     NetworkObserver network_observer_ = NetworkObserver(

@@ -31,6 +31,8 @@ private slots:
     void MousePressed(const QPointF& pos);
     void MouseMoved(const QPointF& pos);
     void MouseReleased(const QPointF& pos);
+    void SpeedSliderMoved(int slider_pos);
+    void LatencySliderMoved(int slider_pos);
 
 private:
     using CommandObservable = observer_pattern::Observable<CommandData>;

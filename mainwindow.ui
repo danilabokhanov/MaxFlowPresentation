@@ -369,6 +369,123 @@ number</string>
          </widget>
         </item>
         <item>
+         <widget class="QFrame" name="frame_speed">
+          <property name="minimumSize">
+           <size>
+            <width>151</width>
+            <height>180</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>151</width>
+            <height>180</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(246, 245, 244);</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QSlider" name="slider_speed">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>60</y>
+             <width>131</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="maximum">
+            <number>10</number>
+           </property>
+           <property name="value">
+            <number>5</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="invertedAppearance">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_speed">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>10</y>
+             <width>131</width>
+             <height>41</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+            </font>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="text">
+            <string>Speed</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_latency">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>80</y>
+             <width>131</width>
+             <height>41</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+            </font>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="text">
+            <string>Latency</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+          <widget class="QSlider" name="slider_latency">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>130</y>
+             <width>131</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="maximum">
+            <number>6</number>
+           </property>
+           <property name="value">
+            <number>3</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="invertedAppearance">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </widget>
+        </item>
+        <item>
          <widget class="QFrame" name="frame_alignment">
           <property name="enabled">
            <bool>true</bool>
@@ -376,7 +493,7 @@ number</string>
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>193</height>
+            <height>0</height>
            </size>
           </property>
           <property name="font">
