@@ -32,6 +32,10 @@ void View::SetupButtons() {
     connect(main_window_.GetSkipButtonPtr(), &QPushButton::clicked, this, &View::SkipButtonPressed);
     connect(main_window_.GetCancelButtonPtr(), &QPushButton::clicked, this,
             &View::CancelButtonPressed);
+    connect(main_window_.GetSpeedSliderPtr(), &QSlider::valueChanged, this,
+            &View::SpeedSliderMoved);
+    connect(main_window_.GetLatencySliderPtr(), &QSlider::valueChanged, this,
+            &View::LatencySliderMoved);
 }
 
 void View::SetupPicker() {
@@ -103,6 +107,18 @@ void View::MouseMoved(const QPointF& pos) {
 void View::MouseReleased(const QPointF& pos) {
     message_.signal_type = CommandData::SignalType::MouseReleased;
     message_.args = MousePosition{.x = pos.x(), .y = pos.y()};
+    command_observable_.Notify();
+}
+
+void View::SpeedSliderMoved(int slider_pos) {
+    message_.signal_type = CommandData::SignalType::ChangeSpeed;
+    message_.args = static_cast<size_t>(slider_pos);
+    command_observable_.Notify();
+}
+
+void View::LatencySliderMoved(int slider_pos) {
+    message_.signal_type = CommandData::SignalType::ChangeLatency;
+    message_.args = static_cast<size_t>(slider_pos);
     command_observable_.Notify();
 }
 

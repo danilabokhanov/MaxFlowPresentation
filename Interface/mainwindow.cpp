@@ -58,6 +58,22 @@ QPushButton* MainWindow::GetCancelButtonPtr() const {
     return ui_->button_cancel;
 }
 
+QSlider* MainWindow::GetSpeedSliderPtr() const {
+    return ui_ -> slider_speed;
+}
+
+QSlider* MainWindow::GetLatencySliderPtr() const {
+    return ui_ -> slider_latency;
+}
+
+size_t MainWindow::GetSpeedSliderNumber() const {
+    return ui_->slider_speed -> value();
+}
+
+size_t MainWindow::GetLatencySliderNumber() const {
+    return ui_->slider_latency -> value();
+}
+
 size_t MainWindow::GetUSpinBoxNumber() const {
     return ui_->spinBox_u->value();
 }

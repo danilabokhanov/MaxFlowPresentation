@@ -19,7 +19,8 @@ struct GeomModelData {
     std::vector<Status> vertices;
     std::vector<QPointF> pos;
     size_t edge_id = std::string::npos;
-    size_t frame_id, frames_number;
+    size_t frame_id = std::string::npos;
+    size_t frames_number;
     size_t flow_rate, pushed_flow;
     size_t selected_vertex = std::string::npos;
 };
@@ -44,7 +45,9 @@ struct CommandData {
         Skip,
         MousePressed,
         MouseMoved,
-        MouseReleased
+        MouseReleased,
+        ChangeSpeed,
+        ChangeLatency
     } signal_type;
     std::variant<size_t, BasicEdge, MousePosition, std::monostate> args;
 };

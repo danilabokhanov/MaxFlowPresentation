@@ -2,6 +2,7 @@
 #include "geom_model.h"
 #include "Interface/drawer_helper.h"
 #include <numbers>
+#include <cmath>
 
 namespace max_flow_app {
 GeomModel::GeomModel() : timer_(new QTimer(this)) {
@@ -37,16 +38,13 @@ void GeomModel::ProcessNextState() {
 }
 
 void GeomModel::AddDynamicState(const MaxFlowData& data) {
-    for (size_t i = 0; i < kFPSRate; i++) {
-        GeomModelData geom_model{.edges = data.edges,
-                                 .vertices = data.vertices,
-                                 .edge_id = data.updated_edge,
-                                 .frame_id = i,
-                                 .frames_number = kFPSRate,
-                                 .flow_rate = data.flow_rate,
-                                 .pushed_flow = data.pushed_flow};
-        states_.push_back({.geom_model = std::move(geom_model)});
-    }
+    GeomModelData geom_model{.edges = data.edges,
+                             .vertices = data.vertices,
+                             .edge_id = data.updated_edge,
+                             .frame_id = 0,
+                             .flow_rate = data.flow_rate,
+                             .pushed_flow = data.pushed_flow};
+    states_.push_back({.geom_model = std::move(geom_model)});
 }
 
 void GeomModel::AddStaticState(const MaxFlowData& data) {
@@ -83,6 +81,35 @@ void GeomModel::SkipFramesRequest() {
     AddUnlockNotification();
 }
 
+void GeomModel::ChangeSpeedRequest(size_t slider_pos) {
+    assert(slider_pos < kSpeedCoef.size());
+    size_t new_speed = ceil(kBasicSpeed * kSpeedCoef[slider_pos]);
+    if (!states_.empty()) {
+        auto& state = states_.front();
+        if (state.geom_model.frame_id != std::string::npos &&
+            state.geom_model.edge_id != std::string::npos) {
+            state.geom_model.frame_id = std::min(
+                (state.geom_model.frame_id * new_speed + speed_ - 1) / speed_, new_speed - 1);
+        }
+    }
+    speed_ = new_speed;
+}
+
+void GeomModel::ChangeLatencyRequest(size_t slider_pos) {
+    assert(slider_pos < kLatencyCoef.size());
+    size_t new_latency = ceil(kBasicLatency * kLatencyCoef[slider_pos]);
+    if (!states_.empty()) {
+        auto& state = states_.front();
+        if (state.geom_model.frame_id != std::string::npos &&
+            state.geom_model.edge_id == std::string::npos) {
+            state.geom_model.frame_id =
+                std::min((state.geom_model.frame_id * new_latency + latency_ - 1) / latency_,
+                         new_latency - 1);
+        }
+    }
+    latency_ = new_latency;
+}
+
 void GeomModel::ResetPos(size_t n) {
     pos_.resize(n);
     for (size_t i = 0; i < n; i++) {
@@ -115,17 +142,31 @@ GeomModel::FrameQueueData GeomModel::SendFrameToView() {
     if (states_.empty()) {
         return FrameQueueData{};
     }
-    auto state = std::move(states_.front());
+    auto state = states_.front();
     if (!state.is_unlock) {
         last_state_ = state.geom_model;
     }
-    states_.pop_front();
     if (size_t vertices_number = state.geom_model.vertices.size();
         vertices_number != pos_.size() && vertices_number) {
         ResetPos(vertices_number);
     }
     state.geom_model.pos = pos_;
     state.geom_model.selected_vertex = selected_vertex_;
+    auto& geom_model = states_.front().geom_model;
+    if (geom_model.frame_id != std::string::npos) {
+        geom_model.frame_id++;
+        if ((geom_model.edge_id == std::string::npos && geom_model.frame_id == latency_) ||
+            (geom_model.edge_id != std::string::npos && geom_model.frame_id == speed_)) {
+            states_.pop_front();
+        }
+        if (geom_model.edge_id == std::string::npos) {
+            state.geom_model.frames_number = latency_;
+        } else {
+            state.geom_model.frames_number = speed_;
+        }
+    } else {
+        states_.pop_front();
+    }
     return state;
 }
 

@@ -49,6 +49,14 @@ void Controller::CallMouseReleasedHandler(const MousePosition& pos) {
     geom_model_ptr_->HandleMouseReleasedAction(pos);
 }
 
+void Controller::CallChangeSpeed(size_t slider_pos) {
+    geom_model_ptr_->ChangeSpeedRequest(slider_pos);
+}
+
+void Controller::CallChangeLatency(size_t slider_pos) {
+    geom_model_ptr_->ChangeLatencyRequest(slider_pos);
+}
+
 Controller::ViewObserver* Controller::GetSubscriberPtr() {
     return &view_observer_;
 }
@@ -84,6 +92,12 @@ void Controller::HandleData(const CommandData& data) {
             break;
         case CommandData::SignalType::MouseReleased:
             CallMouseReleasedHandler(std::get<MousePosition>(data.args));
+            break;
+        case CommandData::SignalType::ChangeSpeed:
+            CallChangeSpeed(std::get<size_t>(data.args));
+            break;
+        case CommandData::SignalType::ChangeLatency:
+            CallChangeLatency(std::get<size_t>(data.args));
             break;
         default:
             assert(0);
