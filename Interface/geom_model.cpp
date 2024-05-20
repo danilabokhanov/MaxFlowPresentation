@@ -138,11 +138,12 @@ QPointF GeomModel::GetVertexPosById(size_t n, size_t index) const {
                                       DrawerHelper::kMaxX * (0.5 - DrawerHelper::kSinkPadingRate));
 }
 
-GeomModel::FrameQueueData GeomModel::SendFrameToView() {
+const GeomModel::FrameQueueData& GeomModel::SendFrameToView() {
     if (states_.empty()) {
-        return FrameQueueData{};
+        message_ = {};
+        return message_;
     }
-    auto state = states_.front();
+    FrameQueueData state = states_.front();
     if (!state.is_unlock) {
         last_state_ = state.geom_model;
     }
@@ -167,7 +168,8 @@ GeomModel::FrameQueueData GeomModel::SendFrameToView() {
     } else {
         states_.pop_front();
     }
-    return state;
+    message_ = std::move(state);
+    return message_;
 }
 
 void GeomModel::UpdateSelectedVertex(const QPointF& pos) {

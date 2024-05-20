@@ -240,12 +240,13 @@ void MaxFlow::AddEdges(std::initializer_list<BasicEdge> edges) {
     }
 }
 
-MaxFlow::Data MaxFlow::GetData() const {
-    return {.edges = edges_,
+const MaxFlow::Data& MaxFlow::GetData() {
+    message_ =  Data{.edges = edges_,
             .vertices = vertices_,
             .updated_edge = updated_edge_,
             .flow_rate = flow_rate_,
             .pushed_flow = pushed_flow_};
+    return message_;
 }
 
 void MaxFlow::RegisterNetworkObserver(observer_pattern::Observer<Data>* observer) {

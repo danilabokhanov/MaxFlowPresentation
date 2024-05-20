@@ -9,7 +9,7 @@ View::View()
       geom_model_observer_([this](const FrameQueueData& data) { UpdateGraphView(data); },
                            [this](const FrameQueueData& data) { UpdateGraphView(data); },
                            [](const FrameQueueData&) {}),
-      command_observable_([this]() { return ProduceViewMessage(); }),
+    command_observable_([this]() -> const CommandData& { return ProduceViewMessage(); }),
       picker_(new QwtPlotPicker(drawer_.GetQwtPlotPtr()->canvas())) {
     SetupButtons();
     SetupPicker();

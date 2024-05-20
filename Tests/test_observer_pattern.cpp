@@ -64,7 +64,7 @@ TEST_CASE("Capture by function") {
 
 TEST_CASE("Capture by lambda") {
     main_counter = 0, inner_counter = 0;
-    Observable<int> observable([]() { return main_counter; });
+    Observable<int> observable([]() -> const int& { return main_counter; });
     Observer<int> observer([](const int&) { inner_counter += kOnSubscribeDelta; },
                            [](const int&) { ++inner_counter; },
                            [](const int&) { inner_counter -= kOnSubscribeDelta; });

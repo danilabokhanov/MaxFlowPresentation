@@ -90,13 +90,11 @@ public:
     Observable& operator=(Observable&&) = delete;
 
     bool Subscribe(SubscriberPtr consumer) {
-        if (!consumer) {
+        if (!consumer || !data_producer_) {
             return false;
         }
-        for (auto subscriber_ptr : subscribers_) {
-            if (subscriber_ptr == consumer) {
-                return false;
-            }
+        if (std::find(subscribers_.begin(), subscribers_.end(), consumer) != subscribers_.end()) {
+            return false;
         }
         subscribers_.push_back(consumer);
         consumer->connection_ = this;
@@ -105,7 +103,10 @@ public:
     }
 
     void Notify() {
-        DataType data = data_producer_();
+        if (!data_producer_) {
+            return;
+        }
+        const DataType& data = data_producer_();
         for (auto ptr : subscribers_) {
             ptr->OnNotify(data);
         }
@@ -117,16 +118,12 @@ public:
         }
     }
 
-    DataType GetData() {
+    const DataType& GetData() const {
         return data_producer_();
     }
 
 private:
     friend class Observer<DataType>;
-
-    static DataType DefaultDataProducer() {
-        return {};
-    }
 
     void Disconnect(SubscriberPtr ptr) {
         assert(ptr);
@@ -134,7 +131,7 @@ private:
         subscribers_.remove(ptr);
     }
 
-    std::function<DataType()> data_producer_ = DefaultDataProducer;
+    std::function<const DataType&()> data_producer_;
     std::list<SubscriberPtr> subscribers_;
 };
 
@@ -240,9 +237,6 @@ public:
 
 private:
     friend class Observer<void>;
-
-    static void DefaultDataProducer() {
-    }
 
     void Disconnect(SubscriberPtr ptr) {
         assert(ptr);

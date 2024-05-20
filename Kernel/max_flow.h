@@ -31,7 +31,7 @@ private:
     using Edge = kernel_messages::Edge;
     using Status = kernel_messages::Status;
 
-    Data GetData() const;
+    const Data& GetData();
     bool FindNetwork();
     void SetPathToBasicStatus(const std::vector<size_t>& path);
     void SetGraphToBasicStatus(bool is_flow_notification);
@@ -72,10 +72,11 @@ private:
     std::vector<Status> vertices_ = std::vector<Status>(n_, Status::Basic);
     size_t updated_edge_ = std::string::npos;
     size_t flow_rate_ = 0, pushed_flow_ = 0;
+    Data message_;
     observer_pattern::Observable<Data> network_observable_ =
-        observer_pattern::Observable<Data>([this]() { return GetData(); });
+        observer_pattern::Observable<Data>([this]() -> const Data& { return GetData(); });
     observer_pattern::Observable<Data> flow_observable_ =
-        observer_pattern::Observable<Data>([this]() { return GetData(); });
+        observer_pattern::Observable<Data>([this]() -> const Data& { return GetData(); });
     observer_pattern::Observable<void> cleanup_observable_;
     observer_pattern::Observable<void> unlock_observable_;
     std::mt19937 rand_generator_;

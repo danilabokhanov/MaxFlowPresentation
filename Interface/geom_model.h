@@ -48,7 +48,7 @@ private:
     void AddUnlockNotification();
     void StartTimer();
     void ResetPos(size_t n);
-    FrameQueueData SendFrameToView();
+    const FrameQueueData& SendFrameToView();
     QPointF GetVertexPosById(size_t n, size_t index) const;
     void UpdateSelectedVertex(const QPointF& pos);
     void MoveVertexToPos(QPointF pos);
@@ -78,10 +78,11 @@ private:
     ClearSignalObserver clear_signal_observer_ =
         ClearSignalObserver([]() {}, [this]() { SkipFrames(); }, []() {});
     StateObservable geom_model_observable_ =
-        StateObservable([this]() { return SendFrameToView(); });
+        StateObservable([this]() -> const FrameQueueData& { return SendFrameToView(); });
     std::vector<QPointF> pos_;
     size_t selected_vertex_ = std::string::npos;
     GeomModelData last_state_;
+    FrameQueueData message_;
 };
 }  // namespace max_flow_app
 
