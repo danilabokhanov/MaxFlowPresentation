@@ -7,6 +7,7 @@
 #include <QwtPlotMarker>
 #include <QwtText>
 #include <QwtPlotTextLabel>
+#include <memory>
 #include "qwt_plot.h"
 #include "Kernel/kernel_messages.h"
 #include "interface_messages.h"
@@ -14,9 +15,9 @@
 namespace max_flow_app {
 class Drawer {
 public:
-    Drawer(QFrame* frame);
-
     using Data = interface_messages::GeomModelData;
+
+    Drawer(QFrame* frame);
 
     void DrawGraph(const Data& data);
     QwtPlot* GetQwtPlotPtr();
@@ -46,24 +47,20 @@ private:
     void ResetState();
 
     struct Vertex {
-        QwtPlotCurve* base;
+        std::unique_ptr<QwtPlotCurve> base;
     };
 
     struct CurveEdge {
-        QwtPlotCurve* head;
-        QwtPlotCurve* tail;
+        std::unique_ptr<QwtPlotCurve> head;
+        std::unique_ptr<QwtPlotCurve> tail;
     };
 
     struct Number {
-        QwtPlotMarker* base;
+        std::unique_ptr<QwtPlotMarker> base;
     };
 
     QVBoxLayout* layout_;
     QwtPlot* plot_;
-    std::list<Vertex> vertices_;
-    std::list<CurveEdge> edges_;
-    std::list<Number> numbers_;
-    QwtPlotMarker* flow_info_;
 };
 
 }  // namespace max_flow_app

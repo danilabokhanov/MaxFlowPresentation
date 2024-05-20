@@ -249,19 +249,19 @@ const MaxFlow::Data& MaxFlow::GetData() {
     return message_;
 }
 
-void MaxFlow::RegisterNetworkObserver(observer_pattern::Observer<Data>* observer) {
+void MaxFlow::RegisterNetworkObserver(MaxFlow::DataObserverPtr observer) {
     assert(network_observable_.Subscribe(observer));
 }
 
-void MaxFlow::RegisterFlowObserver(observer_pattern::Observer<Data>* observer) {
+void MaxFlow::RegisterFlowObserver(MaxFlow::DataObserverPtr observer) {
     assert(flow_observable_.Subscribe(observer));
 }
 
-void MaxFlow::RegisterCleanupObserver(observer_pattern::Observer<void>* observer) {
+void MaxFlow::RegisterCleanupObserver(MaxFlow::EmptyObserverPtr observer) {
     assert(cleanup_observable_.Subscribe(observer));
 }
 
-void MaxFlow::RegisterUnlockObserver(observer_pattern::Observer<void>* observer) {
+void MaxFlow::RegisterUnlockObserver(MaxFlow::EmptyObserverPtr observer) {
     assert(unlock_observable_.Subscribe(observer));
 }
 

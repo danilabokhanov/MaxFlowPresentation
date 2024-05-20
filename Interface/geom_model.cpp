@@ -156,11 +156,12 @@ const GeomModel::FrameQueueData& GeomModel::SendFrameToView() {
     auto& geom_model = states_.front().geom_model;
     if (geom_model.frame_id != std::string::npos) {
         geom_model.frame_id++;
-        if ((geom_model.edge_id == std::string::npos && geom_model.frame_id == latency_) ||
-            (geom_model.edge_id != std::string::npos && geom_model.frame_id == speed_)) {
+        size_t edge_id = geom_model.edge_id;
+        if ((edge_id == std::string::npos && geom_model.frame_id == latency_) ||
+            (edge_id != std::string::npos && geom_model.frame_id == speed_)) {
             states_.pop_front();
         }
-        if (geom_model.edge_id == std::string::npos) {
+        if (edge_id == std::string::npos) {
             state.geom_model.frames_number = latency_;
         } else {
             state.geom_model.frames_number = speed_;

@@ -10,11 +10,13 @@
 namespace max_flow_app {
 class MaxFlow {
 public:
-    MaxFlow() = default;
     using BasicEdge = kernel_messages::BasicEdge;
-    MaxFlow(size_t n, size_t m, std::initializer_list<BasicEdge> edges);
-
     using Data = kernel_messages::MaxFlowData;
+    using DataObserverPtr = observer_pattern::Observer<Data>*;
+    using EmptyObserverPtr = observer_pattern::Observer<void>*;
+
+    MaxFlow() = default;
+    MaxFlow(size_t n, size_t m, std::initializer_list<BasicEdge> edges);
 
     void ChangeVerticesNumberRequest(size_t new_number);
     void AddEdgeRequest(const BasicEdge& edge);
@@ -22,10 +24,10 @@ public:
     void RunRequest();
     void GenRandomSampleRequest();
     void RecoverPrevStateRequest();
-    void RegisterNetworkObserver(observer_pattern::Observer<Data>* observer);
-    void RegisterFlowObserver(observer_pattern::Observer<Data>* observer);
-    void RegisterCleanupObserver(observer_pattern::Observer<void>* observer);
-    void RegisterUnlockObserver(observer_pattern::Observer<void>* observer);
+    void RegisterNetworkObserver(DataObserverPtr observer);
+    void RegisterFlowObserver(DataObserverPtr observer);
+    void RegisterCleanupObserver(EmptyObserverPtr observer);
+    void RegisterUnlockObserver(EmptyObserverPtr observer);
 
 private:
     using Edge = kernel_messages::Edge;
@@ -49,7 +51,7 @@ private:
     const Edge& GetReverseEdge(size_t index) const;
     void AddEdges(std::initializer_list<BasicEdge> edges);
     void AddEdge(const BasicEdge& edge);
-    size_t FindEdge(const MaxFlow::BasicEdge& edge);
+    size_t FindEdge(const BasicEdge& edge);
     void SetEdgeStatus(size_t index, Status status);
     bool IsValid(const BasicEdge& edge);
     void ResetState();
@@ -62,8 +64,10 @@ private:
         std::vector<BasicEdge> edges;
     };
 
-    inline static const size_t kMinVerticesNum = 2, kMaxVerticesNum = 10, kMaxEdgeCapacity = 100,
-                               kStatesStorageSize = 10;
+    static constexpr size_t kMinVerticesNum = 2;
+    static constexpr size_t kMaxVerticesNum = 10;
+    static constexpr size_t kMaxEdgeCapacity = 100;
+    static constexpr size_t kStatesStorageSize = 10;
     size_t n_ = 2, m_ = 0;
     std::vector<std::vector<size_t>> graph_ = std::vector<std::vector<size_t>>(n_);
     std::vector<size_t> dist_ = std::vector<size_t>(n_);

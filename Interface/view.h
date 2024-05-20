@@ -10,12 +10,12 @@ namespace max_flow_app {
 class View : public QObject {
     Q_OBJECT
 public:
-    View();
-
     using FrameQueueData = interface_messages::FrameQueueData;
     using CommandData = interface_messages::CommandData;
     using FrameQueueObserver = observer_pattern::Observer<FrameQueueData>;
     using CommandObserver = observer_pattern::Observer<CommandData>;
+
+    View();
 
     FrameQueueObserver* GetSubscriberPtr();
     void RegisterController(CommandObserver* observer);
@@ -48,9 +48,9 @@ private:
 
     MainWindow main_window_;
     Drawer drawer_;
+    CommandData message_;
     FrameQueueObserver geom_model_observer_;
     CommandObservable command_observable_;
-    CommandData message_;
     QwtPlotPicker* picker_;
 };
 }  // namespace max_flow_app

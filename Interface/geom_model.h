@@ -11,8 +11,6 @@ namespace max_flow_app {
 class GeomModel : public QObject {
     Q_OBJECT
 public:
-    GeomModel();
-
     using MaxFlowData = kernel_messages::MaxFlowData;
     using FrameQueueData = interface_messages::FrameQueueData;
     using MousePosition = interface_messages::MousePosition;
@@ -21,6 +19,8 @@ public:
     using ClearSignalObserver = observer_pattern::Observer<void>;
     using UnlockObserver = observer_pattern::Observer<void>;
     using StateObserver = observer_pattern::Observer<FrameQueueData>;
+
+    GeomModel();
 
     void RegisterView(StateObserver* observer);
     NetworkObserver* GetNetworkObserverPtr();
@@ -56,10 +56,10 @@ private:
     QPointF GetShiftVector(size_t index, const QPointF& pos) const;
     bool IsVertexIntersected(size_t index, const QPointF& pos, QPointF& vec) const;
 
-    static const size_t kFPSRate = 60;
-    static const size_t kTimerInterval = 1000 / kFPSRate;
-    static const size_t kBasicSpeed = kFPSRate;
-    static const size_t kBasicLatency = kFPSRate;
+    static constexpr size_t kFPSRate = 60;
+    static constexpr size_t kTimerInterval = 1000 / kFPSRate;
+    static constexpr size_t kBasicSpeed = kFPSRate;
+    static constexpr size_t kBasicLatency = kFPSRate;
     inline static const std::vector<double> kSpeedCoef = {7.0, 3.0, 2.5, 2.0, 1.5, 1.0,
                                                    0.75, 0.5, 0.33, 0.25, 0.166};
     inline static const std::vector<double> kLatencyCoef = {3.0, 2.0, 1.5, 1.0, 0.75, 0.5, 0.3};
@@ -67,6 +67,7 @@ private:
     size_t latency_ = kBasicLatency;
     std::unique_ptr<QTimer> timer_;
     std::deque<FrameQueueData> states_;
+    FrameQueueData message_;
     NetworkObserver network_observer_ = NetworkObserver(
         [this](const MaxFlowData& data) { AddStaticState(data); },
         [this](const MaxFlowData& data) { AddStaticState(data); }, [](const MaxFlowData&) {});
@@ -82,7 +83,6 @@ private:
     std::vector<QPointF> pos_;
     size_t selected_vertex_ = std::string::npos;
     GeomModelData last_state_;
-    FrameQueueData message_;
 };
 }  // namespace max_flow_app
 

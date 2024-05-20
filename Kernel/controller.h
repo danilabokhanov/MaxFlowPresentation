@@ -8,10 +8,10 @@
 namespace max_flow_app {
 class Controller {
 public:
-    Controller(MaxFlow* model_ptr, GeomModel* geom_model_ptr);
-
     using CommandData = interface_messages::CommandData;
     using ViewObserver = observer_pattern::Observer<CommandData>;
+
+    Controller(MaxFlow* model_ptr, GeomModel* geom_model_ptr);
 
     ViewObserver* GetSubscriberPtr();
 

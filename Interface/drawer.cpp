@@ -66,11 +66,12 @@ void Drawer::AddStaticEdge(const QPointF& begin, const QPointF& end, const Edge&
 
     QVector<QPointF> tail_points;
     tail_points << begin << bend << end;
-    edge.tail = new QwtPlotCurve();
+    edge.tail = std::make_unique<QwtPlotCurve>();
     edge.tail->setPen(GetEdgeColor(data.status), DrawerHelper::kEdgeWidth);
     edge.tail->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.tail->setSamples(tail_points);
     edge.tail->attach(plot_);
+    edge.tail.release();
 
     QVector<QPointF> head_points;
     QPointF head_begin = DrawerHelper::RotateVector(
@@ -78,21 +79,16 @@ void Drawer::AddStaticEdge(const QPointF& begin, const QPointF& end, const Edge&
     QPointF head_end = DrawerHelper::RotateVector(
         end, bend, -std::numbers::pi / 12 + std::numbers::pi / 60, DrawerHelper::kEdgeHeadSide);
     head_points << head_begin << end << head_end;
-    edge.head = new QwtPlotCurve();
+    edge.head = std::make_unique<QwtPlotCurve>();
     edge.head->setPen(GetEdgeColor(data.status), DrawerHelper::kEdgeWidth);
     edge.head->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.head->setSamples(head_points);
     edge.head->attach(plot_);
-
-    edges_.push_back(std::move(edge));
+    edge.head.release();
 }
 
 void Drawer::ResetState() {
     plot_->detachItems();
-    edges_.clear();
-    numbers_.clear();
-    vertices_.clear();
-    flow_info_ = nullptr;
 }
 
 void Drawer::AddNumber(const QPointF& pos, const QColor& color, size_t num) {
@@ -100,18 +96,18 @@ void Drawer::AddNumber(const QPointF& pos, const QColor& color, size_t num) {
     QwtText text(std::to_string(num).data());
     text.setFont(DrawerHelper::kGraphFont);
     text.setColor(color);
-    number.base = new QwtPlotMarker();
+    number.base = std::make_unique<QwtPlotMarker>();
     number.base->setLabel(text);
     number.base->setValue(pos);
     number.base->attach(plot_);
+    number.base.release();
 
-    numbers_.push_back(std::move(number));
 }
 
 void Drawer::AddVertex(const QPointF& pos, Status status, bool is_selected) {
     Vertex vertex;
-    vertex.base = new QwtPlotCurve();
-    QwtSymbol* circle = new QwtSymbol();
+    vertex.base = std::make_unique<QwtPlotCurve>();
+    std::unique_ptr<QwtSymbol> circle = std::make_unique<QwtSymbol>();
     circle->setStyle(QwtSymbol::Ellipse);
     if (!is_selected) {
         circle->setPen(GetBorderColor(status), 3);
@@ -122,9 +118,9 @@ void Drawer::AddVertex(const QPointF& pos, Status status, bool is_selected) {
     }
     circle->setBrush(GetVertexColor(status));
     vertex.base->setSamples({pos});
-    vertex.base->setSymbol(circle);
+    vertex.base->setSymbol(circle.release());
     vertex.base->attach(plot_);
-    vertices_.push_back(std::move(vertex));
+    vertex.base.release();
 }
 
 void Drawer::AddFlowInfo(size_t flow_rate, size_t pushed_flow, const QColor& color) {
@@ -134,10 +130,11 @@ void Drawer::AddFlowInfo(size_t flow_rate, size_t pushed_flow, const QColor& col
     text.setFont(DrawerHelper::kFlowRateFont);
     text.setColor(color);
     text.setRenderFlags(Qt::AlignLeft | Qt::AlignTop);
-    flow_info_ = new QwtPlotMarker();
-    flow_info_->setLabel(text);
-    flow_info_->setValue(DrawerHelper::kFlowInfoPos);
-    flow_info_->attach(plot_);
+    std::unique_ptr<QwtPlotMarker> flow_info = std::make_unique<QwtPlotMarker>();
+    flow_info->setLabel(text);
+    flow_info->setValue(DrawerHelper::kFlowInfoPos);
+    flow_info->attach(plot_);
+    flow_info.release();
 }
 
 QPointF Drawer::CalcEdgeNumberPos(const QPointF& begin, const QPointF& end) {
@@ -192,7 +189,7 @@ void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge
     QColor prev_color = GetEdgeColor(kernel_messages::GetPreviousStatus(data.status));
     QVector<QPointF> tail_points;
     tail_points << begin << bend << end;
-    edge.tail = new QwtPlotCurve();
+    edge.tail = std::make_unique<QwtPlotCurve>();
     if (frame_id + 1 == frames_number) {
         edge.tail->setPen(new_color, DrawerHelper::kEdgeWidth);
     } else {
@@ -210,6 +207,7 @@ void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge
     edge.tail->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.tail->setSamples(tail_points);
     edge.tail->attach(plot_);
+    edge.tail.release();
 
     QVector<QPointF> head_points;
     QPointF head_begin = DrawerHelper::RotateVector(
@@ -217,7 +215,7 @@ void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge
     QPointF head_end = DrawerHelper::RotateVector(
         end, bend, -std::numbers::pi / 12 + std::numbers::pi / 60, DrawerHelper::kEdgeHeadSide);
     head_points << head_begin << end << head_end;
-    edge.head = new QwtPlotCurve();
+    edge.head = std::make_unique<QwtPlotCurve>();
     if (frame_id + 1 == frames_number) {
         edge.head->setPen(new_color, DrawerHelper::kEdgeWidth);
     } else {
@@ -226,8 +224,7 @@ void Drawer::AddDynamicEdge(const QPointF& begin, const QPointF& end, const Edge
     edge.head->setCurveAttribute(QwtPlotCurve::Fitted);
     edge.head->setSamples(head_points);
     edge.head->attach(plot_);
-
-    edges_.push_back(std::move(edge));
+    edge.head.release();
 }
 
 QwtPlot* Drawer::GetQwtPlotPtr() {

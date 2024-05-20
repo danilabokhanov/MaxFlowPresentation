@@ -12,9 +12,15 @@ struct DrawerHelper {
     static double GetVectorLength(const QPointF& vec);
     static QPointF SetVectorLength(const QPointF& vec, double len);
 
-    inline static const double kCurveRate = 0.5, kEdgeHeadSide = 0.35, kVertexRadius = 30,
-                               kCenterPadding = 0.3, kMaxX = 10, kMaxY = 10, kSinkPadingRate = 0.05,
-                               kEdgeWidth = 4, kDistEps = 0.05;
+    static constexpr double kCurveRate = 0.5;
+    static constexpr double kEdgeHeadSide = 0.35;
+    static constexpr double kVertexRadius = 30;
+    static constexpr double kCenterPadding = 0.3;
+    static constexpr double kMaxX = 10.0;
+    static constexpr double kMaxY = 10.0;
+    static constexpr double kSinkPadingRate = 0.05;
+    static constexpr double kEdgeWidth = 4;
+    static constexpr double kDistEps = 0.05;
     inline static const QFont kGraphFont = QFont("Arial", 17, QFont::Bold);
     inline static const QFont kFlowRateFont = QFont("Arial", 20, QFont::Bold);
     inline static const QFont kPushFlowFont = kFlowRateFont;
